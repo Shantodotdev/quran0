@@ -1,13 +1,10 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 
-import {
-  getSurahById,
-  getVersesBySurah,
-} from '#/data/quran/quran-data'
+import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
 
 export const Route = createFileRoute('/surah/$surahId')({
   loader: ({ params }) => {
-    const surahId = Number(params.surahId)
+    const surahId = parseSurahId(params.surahId)
     const surah = getSurahById(surahId)
 
     if (!surah) {
@@ -22,12 +19,22 @@ export const Route = createFileRoute('/surah/$surahId')({
   component: SurahPage,
 })
 
+function parseSurahId(value: string) {
+  const surahId = Number(value)
+
+  if (!Number.isInteger(surahId) || surahId < 1 || surahId > 114) {
+    throw notFound()
+  }
+
+  return surahId
+}
+
 function SurahPage() {
   const { surah, verses } = Route.useLoaderData()
 
   return (
     <>
-      <header className="rounded-lg border border-slate-800 bg-[#151b23] p-4 shadow-sm">
+      <header className="rounded-lg border border-(--app-border) bg-(--app-surface) p-4 shadow-sm">
         <Link to="/" className="text-sm font-medium text-emerald-400">
           Back to Quran Index
         </Link>
@@ -56,10 +63,10 @@ function SurahPage() {
         {verses.map((verse) => (
           <article
             key={verse.verseKey}
-            className="rounded-lg border border-slate-800 bg-[#151b23] p-4 shadow-sm"
+            className="rounded-lg border border-(--app-border) bg-(--app-surface) p-4 shadow-sm"
           >
             <div className="flex items-start justify-between gap-3">
-              <span className="rounded-md bg-slate-800 px-2 py-1 text-sm font-semibold text-slate-300">
+              <span className="rounded-md bg-(--app-surface-raised) px-2 py-1 text-sm font-semibold text-slate-300">
                 {verse.verseKey}
               </span>
             </div>
