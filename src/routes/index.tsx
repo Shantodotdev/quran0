@@ -6,26 +6,17 @@ import {
   getQuranSummary,
   getSurahsByLearningOrder,
 } from '#/data/quran/quran-data'
-import type { QuranSurah, SurahLearningTier } from '#/data/quran/types'
+import type { QuranSurah } from '#/data/quran/types'
 
 export const Route = createFileRoute('/')({ component: Home })
 
 type SortMode = 'surah-asc' | 'easy-hard' | 'hard-easy'
-type GroupMode = 'none' | 'tier'
-
-const tierOrder: Array<SurahLearningTier> = [
-  'Beginner',
-  'Easy-medium',
-  'Medium-hard',
-  'Hardest',
-]
 
 function Home() {
   const [sortMode, setSortMode] = useState<SortMode>('surah-asc')
-  const [groupMode, setGroupMode] = useState<GroupMode>('none')
   const summary = getQuranSummary()
 
-  const sortedSurahs = useMemo(() => {
+  const surahs = useMemo(() => {
     if (sortMode === 'easy-hard') {
       return getSurahsByLearningOrder('asc')
     }
@@ -36,15 +27,6 @@ function Home() {
 
     return getAllSurahs()
   }, [sortMode])
-
-  const groupedSurahs = useMemo(() => {
-    return tierOrder
-      .map((tier) => ({
-        tier,
-        surahs: sortedSurahs.filter((surah) => surah.learningTier === tier),
-      }))
-      .filter((group) => group.surahs.length > 0)
-  }, [sortedSurahs])
 
   return (
     <>
@@ -71,34 +53,9 @@ function Home() {
             <option value="hard-easy">Hardest to easiest</option>
           </select>
         </label>
-
-        <label className="flex items-center justify-between gap-3 rounded-md border border-slate-700 px-3 py-3 text-sm font-medium text-slate-300">
-          Group by learning tier
-          <input
-            type="checkbox"
-            checked={groupMode === 'tier'}
-            onChange={(event) =>
-              setGroupMode(event.target.checked ? 'tier' : 'none')
-            }
-            className="h-5 w-5 accent-emerald-500"
-          />
-        </label>
       </section>
 
-      {groupMode === 'tier' ? (
-        <div className="grid gap-6">
-          {groupedSurahs.map((group) => (
-            <section key={group.tier} className="grid gap-3">
-              <h2 className="text-sm font-semibold uppercase tracking-normal text-slate-500">
-                {group.tier}
-              </h2>
-              <SurahList surahs={group.surahs} />
-            </section>
-          ))}
-        </div>
-      ) : (
-        <SurahList surahs={sortedSurahs} />
-      )}
+      <SurahList surahs={surahs} />
     </>
   )
 }
