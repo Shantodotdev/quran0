@@ -1,5 +1,10 @@
 @import 'tailwindcss';
 
+@theme {
+  --animate-dropdown-in: dropdown-in 0.15s ease-out;
+  --animate-dropdown-out: dropdown-out 0.15s ease-in forwards;
+}
+
 :root {
   --app-bg: #0d1117;
   --app-surface: #151b23;
@@ -44,4 +49,26 @@ body {
     'liga' 1,
     'calt' 1;
   word-spacing: normal;
+}
+
+@keyframes dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdown-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
 }
