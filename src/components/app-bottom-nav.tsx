@@ -9,7 +9,7 @@ export function AppBottomNav() {
   const isProgressActive = pathname.startsWith('/progress')
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-800 bg-[#11161d]/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-(--app-border) bg-(--app-surface-raised) px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur">
       <div className="mx-auto grid max-w-2xl grid-cols-2 gap-2">
         <Link
           to="/"

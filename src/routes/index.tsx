@@ -58,13 +58,13 @@ function Home() {
         </p>
       </header>
 
-      <section className="grid gap-3 rounded-lg border border-slate-800 bg-[#151b23] p-3 shadow-sm">
+      <section className="grid gap-3 rounded-lg border border-(--app-border) bg-(--app-surface) p-3 shadow-sm">
         <label className="grid gap-1 text-sm font-medium text-slate-300">
           Sort
           <select
             value={sortMode}
             onChange={(event) => setSortMode(event.target.value as SortMode)}
-            className="min-h-11 rounded-md border border-slate-700 bg-[#0d1117] px-3 text-base text-slate-100 outline-none focus:border-emerald-500"
+            className="min-h-11 rounded-md border border-slate-700 bg-(--app-control) px-3 text-base text-slate-100 outline-none focus:border-emerald-500"
           >
             <option value="surah-asc">First to last surah</option>
             <option value="easy-hard">Easiest to hardest</option>
@@ -111,7 +111,7 @@ function SurahList({ surahs }: { surahs: Array<QuranSurah> }) {
           key={surah.id}
           to="/surah/$surahId"
           params={{ surahId: String(surah.id) }}
-          className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg border border-slate-800 bg-[#151b23] p-3 shadow-sm"
+          className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg border border-(--app-border) bg-(--app-surface) p-3 shadow-sm"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-500/15 text-sm font-semibold text-emerald-300">
             {surah.id}

@@ -40,7 +40,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <div className="min-h-screen bg-[#0d1117] text-slate-100">
+        <div className="min-h-screen bg-(--app-bg) text-slate-100">
           <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
             {children}
           </main>

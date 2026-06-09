@@ -4,7 +4,7 @@ export const Route = createFileRoute('/progress')({ component: ProgressPage })
 
 function ProgressPage() {
   return (
-    <header className="rounded-lg border border-slate-800 bg-[#151b23] p-4 shadow-sm">
+    <header className="rounded-lg border border-(--app-border) bg-(--app-surface) p-4 shadow-sm">
       <Link to="/" className="text-sm font-medium text-emerald-400">
         Back to Quran Index
       </Link>
