@@ -15,6 +15,7 @@ export type QuranSurah = {
   nameArabic: string
   nameSimple: string
   nameComplex: string
+  banglaName: string
   translatedNameBn: string
   learningRank: number
   learningTier: SurahLearningTier

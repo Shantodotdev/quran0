@@ -72,6 +72,7 @@ const surahs: Array<QuranSurah> = rawChapters.chapters.map((chapter) => {
     nameArabic: chapter.name_arabic,
     nameSimple: chapter.name_simple,
     nameComplex: chapter.name_complex,
+    banglaName: learningMeta.banglaName,
     translatedNameBn: chapter.translated_name.name,
     learningRank: learningMeta.rank,
     learningTier: learningMeta.tier,
