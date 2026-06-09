@@ -18,11 +18,12 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'Quran0',
+        title: 'Quran0 — Read the Quran Online',
       },
       {
         name: 'description',
-        content: 'A Quran website built with TanStack Start.',
+        content:
+          'Read the Quran online with Bengali translations. Browse all 114 surahs, search by ease of learning, and follow along with transliteration.',
       },
     ],
     links: [
@@ -53,7 +54,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           </main>
           <AppBottomNav />
         </div>
-        <TanStackDevtools
+        {/* <TanStackDevtools
           config={{
             position: 'bottom-right',
           }}
@@ -63,7 +64,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
               render: <TanStackRouterDevtoolsPanel />,
             },
           ]}
-        />
+        /> */}
         <Analytics />
         <Scripts />
       </body>

@@ -17,6 +17,26 @@ export const Route = createFileRoute('/surah/$surahId')({
       verses: getVersesBySurah(surahId),
     }
   },
+  head: ({ loaderData }) => {
+    const surah = loaderData?.surah
+    if (!surah) {
+      return {
+        meta: [{ title: 'Surah — Quran0' }],
+      }
+    }
+
+    return {
+      meta: [
+        {
+          title: `Surah ${surah.nameSimple} (${surah.banglaName}) — Quran0`,
+        },
+        {
+          name: 'description',
+          content: `Read Surah ${surah.nameSimple} (${surah.banglaName}), the ${surah.id}th surah of the Quran with ${surah.versesCount} verses. Includes Bengali translation and transliteration.`,
+        },
+      ],
+    }
+  },
   component: SurahPage,
 })
 
