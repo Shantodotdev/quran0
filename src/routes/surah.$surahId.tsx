@@ -1,4 +1,5 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+import { ArrowLeft } from 'lucide-react'
 
 import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
 
@@ -35,26 +36,30 @@ function SurahPage() {
   return (
     <>
       <header className="rounded-lg border border-(--app-border) bg-(--app-surface) p-4 shadow-sm">
-        <Link to="/" className="text-sm font-medium text-emerald-400">
-          Back to Quran Index
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-sm text-emerald-400 transition-colors"
+        >
+          <ArrowLeft className="size-4" />
+          <span>All Surahs</span>
         </Link>
-        <div className="mt-4 flex items-start justify-between gap-4">
+        <div className="mt-3 flex items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-slate-400">
-              Surah {surah.id} | {surah.versesCount} ayahs
+            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+              Surah {surah.id} · {surah.versesCount} Ayahs
             </p>
-            <h1 className="mt-1 text-3xl font-semibold tracking-normal">
+            <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-slate-100">
               {surah.nameSimple}
             </h1>
-            <p className="mt-1 text-lg font-medium text-slate-200" lang="bn">
+            <p className="mt-0.5 text-base text-slate-300" lang="bn">
               {surah.banglaName}
             </p>
-            <p className="mt-1 text-base text-slate-400" lang="bn">
+            <p className="mt-0.5 text-sm text-slate-500" lang="bn">
               {surah.translatedNameBn}
             </p>
           </div>
           <p
-            className="quran-arabic text-right text-4xl leading-tight text-slate-100"
+            className="quran-arabic shrink-0 text-right text-3xl leading-tight text-slate-100"
             dir="rtl"
           >
             {surah.nameArabic}
@@ -64,10 +69,7 @@ function SurahPage() {
 
       <section className="grid gap-3">
         {verses.map((verse) => (
-          <article
-            key={verse.verseKey}
-            className="p-3"
-          >
+          <article key={verse.verseKey} className="p-3">
             <div className="flex items-start justify-between gap-3">
               <span className="rounded-md bg-(--app-surface-raised) px-2 py-1 text-sm font-semibold text-slate-300">
                 {verse.verseKey}
