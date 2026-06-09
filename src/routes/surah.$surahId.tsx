@@ -66,7 +66,7 @@ function SurahPage() {
         {verses.map((verse) => (
           <article
             key={verse.verseKey}
-            className="rounded-lg border border-(--app-border) bg-(--app-surface) p-4 shadow-sm"
+            className="p-3"
           >
             <div className="flex items-start justify-between gap-3">
               <span className="rounded-md bg-(--app-surface-raised) px-2 py-1 text-sm font-semibold text-slate-300">
@@ -74,16 +74,16 @@ function SurahPage() {
               </span>
             </div>
             <p
-              className="quran-arabic mt-5 text-right text-[2.15rem] leading-loose text-slate-50"
+              className="quran-arabic mt-5 text-right text-[1.75rem] leading-relaxed text-slate-50"
               dir="rtl"
               lang="ar"
             >
               {verse.arabicIndopak}
             </p>
-            <p className="mt-4 text-lg leading-8 text-slate-200">
+            <p className="mt-4 text-base leading-7 text-slate-200">
               {verse.transliterationEn}
             </p>
-            <p className="mt-3 text-base leading-8 text-slate-400" lang="bn">
+            <p className="mt-3 text-sm leading-7 text-slate-400" lang="bn">
               {verse.translationBnTaisirul}
             </p>
           </article>

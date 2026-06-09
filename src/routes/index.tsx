@@ -53,7 +53,7 @@ function Home() {
             key={surah.id}
             to="/surah/$surahId"
             params={{ surahId: String(surah.id) }}
-            className="grid grid-cols-[auto_1fr] items-center gap-3 rounded-lg border border-(--app-border) bg-(--app-surface) p-3 shadow-sm"
+            className="grid grid-cols-[auto_1fr] items-center gap-3 p-3"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-500/15 text-lg font-semibold text-emerald-300">
               {surah.id}
