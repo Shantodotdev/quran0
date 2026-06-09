@@ -7,7 +7,7 @@ const themes = [
   { value: 'green', label: 'Green', color: '#1b4332' },
 ] as const
 
-export type Theme = (typeof themes)[number]['value']
+type Theme = (typeof themes)[number]['value']
 
 export function ThemeSelector() {
   const [visible, setVisible] = useState(false)

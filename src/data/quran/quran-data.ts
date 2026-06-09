@@ -137,10 +137,3 @@ export function getSurahById(surahId: number) {
 export function getVersesBySurah(surahId: number) {
   return versesBySurah.get(surahId) ?? []
 }
-
-export function getQuranSummary() {
-  return {
-    surahCount: surahs.length,
-    verseCount: verses.length,
-  }
-}
