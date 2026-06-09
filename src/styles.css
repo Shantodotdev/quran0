@@ -1,5 +1,11 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'Digital Khatt IndoPak';
+  src: url('../resources/DigitalKhattIndoPak.otf') format('opentype');
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -22,4 +28,15 @@ body {
     sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+.quran-arabic {
+  font-family:
+    'Digital Khatt IndoPak',
+    'Traditional Arabic',
+    serif;
+  font-feature-settings:
+    'liga' 1,
+    'calt' 1;
+  word-spacing: normal;
 }

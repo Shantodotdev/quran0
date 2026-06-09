@@ -135,7 +135,10 @@ function SurahList({ surahs }: { surahs: Array<QuranSurah> }) {
               {surah.learningRank}
             </span>
           </span>
-          <span className="text-right text-xl leading-none text-slate-800" dir="rtl">
+          <span
+            className="quran-arabic text-right text-xl leading-none text-slate-800"
+            dir="rtl"
+          >
             {surah.nameArabic}
           </span>
         </Link>

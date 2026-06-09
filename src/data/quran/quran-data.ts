@@ -1,5 +1,6 @@
 import chaptersPayload from '../../../resources/qul-chapters-bn.json'
 import indopakPayload from '../../../resources/digital-khatt-indopak-ayah-by-ayah-script.json'
+import transliterationPayload from '../../../resources/english-transliteration-tajweed.json'
 import translationPayload from '../../../resources/bn-taisirul-quran-simple.json'
 import { getSurahLearningMeta } from './surah-learning-order'
 import type { QuranSurah, QuranVerse, VerseKey } from './types'
@@ -38,6 +39,9 @@ type RawTranslationVerse = {
 
 const rawChapters = chaptersPayload as RawChaptersPayload
 const rawArabicByKey = indopakPayload as Record<VerseKey, RawArabicVerse>
+const rawTransliterationByKey = transliterationPayload as Partial<
+  Record<VerseKey, string>
+>
 const rawTranslationByKey = translationPayload as Partial<
   Record<VerseKey, RawTranslationVerse>
 >
@@ -46,6 +50,7 @@ const rawTranslationByKey = translationPayload as Partial<
  * QUL source contract:
  * - chapter metadata comes from /api/v1/chapters?locale=bn
  * - Arabic script is Digital Khatt IndoPak ayah-by-ayah JSON
+ * - English pronunciation comes from QUL English Transliteration(Tajweed)
  * - Bengali translation is Taisirul Quran simple JSON
  * All verse joins use the canonical "surah:ayah" key, for example "87:3".
  */
@@ -80,7 +85,12 @@ const surahs: Array<QuranSurah> = rawChapters.chapters.map((chapter) => {
 
 const verses: Array<QuranVerse> = Object.entries(rawArabicByKey).map(
   ([verseKey, arabicVerse]) => {
+    const transliteration = rawTransliterationByKey[verseKey as VerseKey]
     const translation = rawTranslationByKey[verseKey as VerseKey]
+
+    if (!transliteration) {
+      throw new Error(`Missing English transliteration for verse ${verseKey}`)
+    }
 
     if (!translation) {
       throw new Error(`Missing Bengali translation for verse ${verseKey}`)
@@ -92,6 +102,7 @@ const verses: Array<QuranVerse> = Object.entries(rawArabicByKey).map(
       surahNumber: arabicVerse.surah,
       ayahNumber: arabicVerse.ayah,
       arabicIndopak: arabicVerse.text,
+      transliterationEn: transliteration,
       translationBnTaisirul: translation.t,
     }
   },

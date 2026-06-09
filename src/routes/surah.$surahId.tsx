@@ -44,7 +44,10 @@ function SurahPage() {
                 {surah.translatedNameBn}
               </p>
             </div>
-            <p className="text-right text-4xl leading-tight text-slate-900" dir="rtl">
+            <p
+              className="quran-arabic text-right text-4xl leading-tight text-slate-900"
+              dir="rtl"
+            >
               {surah.nameArabic}
             </p>
           </div>
@@ -62,13 +65,16 @@ function SurahPage() {
                 </span>
               </div>
               <p
-                className="mt-5 text-right text-3xl leading-loose text-slate-950"
+                className="quran-arabic mt-5 text-right text-[2.15rem] leading-loose text-slate-950"
                 dir="rtl"
                 lang="ar"
               >
                 {verse.arabicIndopak}
               </p>
-              <p className="mt-4 text-base leading-8 text-slate-700" lang="bn">
+              <p className="mt-4 text-lg leading-8 text-slate-800">
+                {verse.transliterationEn}
+              </p>
+              <p className="mt-3 text-base leading-8 text-slate-700" lang="bn">
                 {verse.translationBnTaisirul}
               </p>
             </article>

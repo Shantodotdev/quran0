@@ -6,6 +6,7 @@ export type QuranVerse = {
   surahNumber: number
   ayahNumber: number
   arabicIndopak: string
+  transliterationEn: string
   translationBnTaisirul: string
 }
 
