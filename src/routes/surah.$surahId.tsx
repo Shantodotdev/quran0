@@ -46,7 +46,10 @@ function SurahPage() {
             <h1 className="mt-1 text-3xl font-semibold tracking-normal">
               {surah.nameSimple}
             </h1>
-            <p className="mt-1 text-base text-slate-400">
+            <p className="mt-1 text-lg font-medium text-slate-200" lang="bn">
+              {surah.banglaName}
+            </p>
+            <p className="mt-1 text-base text-slate-400" lang="bn">
               {surah.translatedNameBn}
             </p>
           </div>

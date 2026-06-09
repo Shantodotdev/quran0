@@ -68,9 +68,9 @@ function SurahList({ surahs }: { surahs: Array<QuranSurah> }) {
           key={surah.id}
           to="/surah/$surahId"
           params={{ surahId: String(surah.id) }}
-          className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg border border-(--app-border) bg-(--app-surface) p-3 shadow-sm"
+          className="grid grid-cols-[auto_1fr] items-center gap-3 rounded-lg border border-(--app-border) bg-(--app-surface) p-3 shadow-sm"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-500/15 text-sm font-semibold text-emerald-300">
+          <span className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-500/15 text-lg font-semibold text-emerald-300">
             {surah.id}
           </span>
           <span className="min-w-0">
@@ -78,15 +78,8 @@ function SurahList({ surahs }: { surahs: Array<QuranSurah> }) {
               {surah.nameSimple}
             </span>
             <span className="mt-0.5 block truncate text-sm text-slate-400">
-              {surah.translatedNameBn} | {surah.versesCount} ayahs | Rank{' '}
-              {surah.learningRank}
+              {surah.banglaName} | {surah.translatedNameBn}
             </span>
-          </span>
-          <span
-            className="quran-arabic text-right text-xl leading-none text-slate-100"
-            dir="rtl"
-          >
-            {surah.nameArabic}
           </span>
         </Link>
       ))}
