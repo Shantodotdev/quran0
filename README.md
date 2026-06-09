@@ -52,9 +52,16 @@ Path aliases:
 
 ## Quran Data
 
-Quran0 currently uses local resource files stored in `resources/`. These files
-were downloaded manually and are imported into the app data layer from
-`src/data/quran/quran-data.ts`.
+Quran0 uses local source resource files stored in `resources/`. These files are
+downloaded manually, then converted into smaller app-ready JSON files with:
+
+```bash
+npm run generate-quran-data
+```
+
+The generated files live in `src/data/quran/generated/`. The Quran index imports
+only compact surah metadata, while each reader page lazy-loads one surah verse
+chunk at a time.
 
 ### Resource Files
 
@@ -101,22 +108,29 @@ verse keys:
 - English transliteration
 - Bengali Taisirul translation
 
-The app keeps the downloaded source files unchanged and creates typed runtime
-objects in `src/data/quran/quran-data.ts`.
+The app keeps the downloaded source files unchanged. Runtime data is read from:
+
+```text
+src/data/quran/generated/surahs.json
+src/data/quran/generated/surahs/001.json
+src/data/quran/generated/surahs/002.json
+...
+src/data/quran/generated/surahs/114.json
+```
 
 ### Learning Order
 
 The easiest-to-hardest sorting order comes from the user's Notion page named
 `Quran Table`.
 
-That mapping is stored separately in:
+That mapping is applied during data generation in:
 
 ```text
-src/data/quran/surah-learning-order.ts
+scripts/generate-quran-data.mjs
 ```
 
-This keeps the user's learning order separate from the Quran text and QUL
-metadata.
+This keeps the runtime data compact while preserving the user's learning order
+inside the generated surah metadata.
 
 ## Repository Structure
 
@@ -128,7 +142,10 @@ src/components/
   Shared UI components, including the bottom navigation
 
 src/data/quran/
-  Typed Quran data loading, joins, metadata, and learning order
+  Typed Quran data access and generated Quran chunks
+
+scripts/generate-quran-data.mjs
+  Builds optimized app-ready Quran JSON from the raw resources
 
 src/routes/
   TanStack Router file-based routes
@@ -182,6 +199,7 @@ http://localhost:3000
 | Command                   | Purpose                                   |
 | ------------------------- | ----------------------------------------- |
 | `npm run dev`             | Start the local development server        |
+| `npm run generate-quran-data` | Regenerate optimized Quran data chunks |
 | `npm run generate-routes` | Regenerate the TanStack Router route tree |
 | `npm run lint`            | Run ESLint                                |
 | `npm run test`            | Run Vitest                                |
@@ -202,12 +220,16 @@ http://localhost:3000
 - The Quran font and Quran script must stay matched. The current Arabic text
   uses Digital Khatt IndoPak data and the matching Digital Khatt IndoPak font.
 
-## Future Data Direction
+## Data Performance
 
-The current data files are imported directly into the app. That is simple and
-works well for this first pass. Before launch, the data layer should likely move
-toward generated static chunks, such as one JSON file per surah, so the first
-page does not need to load the entire Quran payload.
+The raw Quran files are not imported directly into the main app bundle. The
+generator creates:
+
+- one compact `surahs.json` metadata file for the Quran index
+- 114 lazy verse chunks, one per surah
+
+This keeps the initial Quran index bundle smaller and loads full verse content
+only when a specific surah page is opened.
 
 The current `resources/` directory is acceptable for this stage. If the resource
 folder grows, a clearer structure may be introduced:

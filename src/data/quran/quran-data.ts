@@ -1,123 +1,21 @@
-import chaptersPayload from '../../../resources/qul-chapters-bn.json'
-import indopakPayload from '../../../resources/digital-khatt-indopak-ayah-by-ayah-script.json'
-import transliterationPayload from '../../../resources/english-transliteration-tajweed.json'
-import translationPayload from '../../../resources/bn-taisirul-quran-simple.json'
-import { getSurahLearningMeta } from './surah-learning-order'
-import type { QuranSurah, QuranVerse, VerseKey } from './types'
+import surahsPayload from './generated/surahs.json'
+import type { QuranSurah, QuranVerse } from './types'
 
-type RawChapter = {
-  id: number
-  bismillah_pre: boolean
-  revelation_order: number
-  revelation_place: string
-  name_complex: string
-  name_arabic: string
-  name_simple: string
-  verses_count: number
-  pages: Array<number>
-  translated_name: {
-    language_name: string
-    name: string
-  }
-}
-
-type RawChaptersPayload = {
-  chapters: Array<RawChapter>
-}
-
-type RawArabicVerse = {
-  id: number
-  verse_key: VerseKey
-  surah: number
-  ayah: number
-  text: string
-}
-
-type RawTranslationVerse = {
-  t: string
-}
-
-const rawChapters = chaptersPayload as RawChaptersPayload
-const rawArabicByKey = indopakPayload as Record<VerseKey, RawArabicVerse>
-const rawTransliterationByKey = transliterationPayload as Partial<
-  Record<VerseKey, string>
->
-const rawTranslationByKey = translationPayload as Partial<
-  Record<VerseKey, RawTranslationVerse>
->
+const surahs = surahsPayload as Array<QuranSurah>
+const surahsById = new Map(surahs.map((surah) => [surah.id, surah]))
+const verseChunkLoaders = import.meta.glob<Array<QuranVerse>>(
+  './generated/surahs/*.json',
+  {
+    import: 'default',
+  },
+) as Partial<Record<string, () => Promise<Array<QuranVerse>>>>
 
 /**
- * QUL source contract:
- * - chapter metadata comes from /api/v1/chapters?locale=bn
- * - Arabic script is Digital Khatt IndoPak ayah-by-ayah JSON
- * - English pronunciation comes from QUL English Transliteration(Tajweed)
- * - Bengali translation is Taisirul Quran simple JSON
- * All verse joins use the canonical "surah:ayah" key, for example "87:3".
+ * Runtime data contract:
+ * - `generated/surahs.json` is small metadata used by the Quran index.
+ * - `generated/surahs/001.json` through `114.json` are lazy-loaded verse chunks.
+ * - Generated files come from `resources/*` via `scripts/generate-quran-data.mjs`.
  */
-const surahs: Array<QuranSurah> = rawChapters.chapters.map((chapter) => {
-  const learningMeta = getSurahLearningMeta(chapter.id)
-  const pages = chapter.pages
-  const revelationPlace = chapter.revelation_place
-
-  if (pages.length !== 2) {
-    throw new Error(`Invalid page range for surah ${chapter.id}`)
-  }
-
-  if (revelationPlace !== 'makkah' && revelationPlace !== 'madinah') {
-    throw new Error(`Invalid revelation place for surah ${chapter.id}`)
-  }
-
-  return {
-    id: chapter.id,
-    nameArabic: chapter.name_arabic,
-    nameSimple: chapter.name_simple,
-    nameComplex: chapter.name_complex,
-    banglaName: learningMeta.banglaName,
-    translatedNameBn: chapter.translated_name.name,
-    learningRank: learningMeta.rank,
-    learningTier: learningMeta.tier,
-    revelationPlace,
-    revelationOrder: chapter.revelation_order,
-    versesCount: chapter.verses_count,
-    pages: [pages[0], pages[1]],
-    bismillahPre: chapter.bismillah_pre,
-  }
-})
-
-const verses: Array<QuranVerse> = Object.entries(rawArabicByKey).map(
-  ([verseKey, arabicVerse]) => {
-    const transliteration = rawTransliterationByKey[verseKey as VerseKey]
-    const translation = rawTranslationByKey[verseKey as VerseKey]
-
-    if (!transliteration) {
-      throw new Error(`Missing English transliteration for verse ${verseKey}`)
-    }
-
-    if (!translation) {
-      throw new Error(`Missing Bengali translation for verse ${verseKey}`)
-    }
-
-    return {
-      id: arabicVerse.id,
-      verseKey: verseKey as VerseKey,
-      surahNumber: arabicVerse.surah,
-      ayahNumber: arabicVerse.ayah,
-      arabicIndopak: arabicVerse.text,
-      transliterationEn: transliteration,
-      translationBnTaisirul: translation.t,
-    }
-  },
-)
-
-const surahsById = new Map(surahs.map((surah) => [surah.id, surah]))
-const versesBySurah = new Map<number, Array<QuranVerse>>()
-
-for (const verse of verses) {
-  const existingVerses = versesBySurah.get(verse.surahNumber) ?? []
-  existingVerses.push(verse)
-  versesBySurah.set(verse.surahNumber, existingVerses)
-}
-
 export function getAllSurahs() {
   return surahs
 }
@@ -134,6 +32,13 @@ export function getSurahById(surahId: number) {
   return surahsById.get(surahId)
 }
 
-export function getVersesBySurah(surahId: number) {
-  return versesBySurah.get(surahId) ?? []
+export async function getVersesBySurah(surahId: number) {
+  const fileName = String(surahId).padStart(3, '0')
+  const loadVerseChunk = verseChunkLoaders[`./generated/surahs/${fileName}.json`]
+
+  if (!loadVerseChunk) {
+    throw new Error(`Missing verse chunk for surah ${surahId}`)
+  }
+
+  return loadVerseChunk()
 }

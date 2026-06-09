@@ -1,6 +1,13 @@
-import type { SurahLearningTier } from './types'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
-const EASY_TO_HARD_SURAH_IDS = [
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+const resourcesDir = path.join(rootDir, 'resources')
+const outputDir = path.join(rootDir, 'src', 'data', 'quran', 'generated')
+const surahOutputDir = path.join(outputDir, 'surahs')
+
+const learningOrder = [
   1, 112, 108, 114, 113, 103, 106, 110, 105, 111, 109, 107, 97, 94, 102, 95,
   99, 104, 101, 93, 100, 91, 86, 87, 96, 92, 82, 90, 98, 88, 85, 84, 81, 89,
   80, 83, 75, 77, 78, 62, 73, 63, 79, 71, 76, 70, 61, 64, 72, 69, 66, 74, 68,
@@ -10,18 +17,7 @@ const EASY_TO_HARD_SURAH_IDS = [
   4, 2,
 ]
 
-const tierByRank = [
-  { maxRank: 25, tier: 'Beginner' },
-  { maxRank: 55, tier: 'Easy-medium' },
-  { maxRank: 85, tier: 'Medium-hard' },
-  { maxRank: 114, tier: 'Hardest' },
-] satisfies Array<{ maxRank: number; tier: SurahLearningTier }>
-
-const rankBySurahId = new Map(
-  EASY_TO_HARD_SURAH_IDS.map((surahId, index) => [surahId, index + 1]),
-)
-
-const banglaNameBySurahId = new Map<number, string>([
+const banglaNameBySurahId = new Map([
   [1, 'আল-ফাতিহা'],
   [2, 'আল-বাকারাহ'],
   [3, 'আলে ইমরান'],
@@ -138,31 +134,85 @@ const banglaNameBySurahId = new Map<number, string>([
   [114, 'আন-নাস'],
 ])
 
-/**
- * User learning order from the Notion page "Quran Table", fetched 2026-06-09.
- * Ranks are easiest-to-hardest and tiers come from that same table.
- */
-export function getSurahLearningMeta(surahId: number) {
-  const rank = rankBySurahId.get(surahId)
-  const banglaName = banglaNameBySurahId.get(surahId)
+const tierByRank = [
+  { maxRank: 25, tier: 'Beginner' },
+  { maxRank: 55, tier: 'Easy-medium' },
+  { maxRank: 85, tier: 'Medium-hard' },
+  { maxRank: 114, tier: 'Hardest' },
+]
 
-  if (!rank) {
-    throw new Error(`Missing learning rank for surah ${surahId}`)
-  }
+const rankBySurahId = new Map(
+  learningOrder.map((surahId, index) => [surahId, index + 1]),
+)
 
-  if (!banglaName) {
-    throw new Error(`Missing Bangla name for surah ${surahId}`)
-  }
+const chaptersPayload = await readJson('qul-chapters-bn.json')
+const arabicByKey = await readJson('digital-khatt-indopak-ayah-by-ayah-script.json')
+const transliterationByKey = await readJson('english-transliteration-tajweed.json')
+const translationByKey = await readJson('bn-taisirul-quran-simple.json')
 
+await mkdir(surahOutputDir, { recursive: true })
+
+const surahs = chaptersPayload.chapters.map((chapter) => {
+  const rank = rankBySurahId.get(chapter.id)
   const tier = tierByRank.find((item) => rank <= item.maxRank)?.tier
+  const banglaName = banglaNameBySurahId.get(chapter.id)
 
-  if (!tier) {
-    throw new Error(`Missing learning tier for surah ${surahId}`)
+  if (!rank || !tier || !banglaName) {
+    throw new Error(`Missing learning metadata for surah ${chapter.id}`)
+  }
+
+  if (chapter.pages.length !== 2) {
+    throw new Error(`Invalid page range for surah ${chapter.id}`)
   }
 
   return {
+    id: chapter.id,
+    nameArabic: chapter.name_arabic,
+    nameSimple: chapter.name_simple,
     banglaName,
-    rank,
-    tier,
+    translatedNameBn: chapter.translated_name.name,
+    learningRank: rank,
+    learningTier: tier,
+    versesCount: chapter.verses_count,
   }
+})
+
+await writeJson(path.join(outputDir, 'surahs.json'), surahs)
+
+for (const surah of surahs) {
+  const verses = []
+
+  for (let ayahNumber = 1; ayahNumber <= surah.versesCount; ayahNumber += 1) {
+    const verseKey = `${surah.id}:${ayahNumber}`
+    const arabicVerse = arabicByKey[verseKey]
+    const transliteration = transliterationByKey[verseKey]
+    const translation = translationByKey[verseKey]
+
+    if (!arabicVerse || !transliteration || !translation) {
+      throw new Error(`Missing verse data for ${verseKey}`)
+    }
+
+    verses.push({
+      verseKey,
+      arabicIndopak: arabicVerse.text,
+      transliterationEn: transliteration,
+      translationBnTaisirul: translation.t,
+    })
+  }
+
+  await writeJson(
+    path.join(surahOutputDir, `${String(surah.id).padStart(3, '0')}.json`),
+    verses,
+  )
+}
+
+console.log(`Generated ${surahs.length} surah metadata records.`)
+console.log(`Generated ${surahs.length} lazy verse chunks in ${surahOutputDir}.`)
+
+async function readJson(fileName) {
+  return JSON.parse(await readFile(path.join(resourcesDir, fileName), 'utf8'))
+}
+
+async function writeJson(filePath, value) {
+  await writeFile(filePath, `${JSON.stringify(value)}\n`)
 }

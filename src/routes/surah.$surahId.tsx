@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
 
 export const Route = createFileRoute('/surah/$surahId')({
-  loader: ({ params }) => {
+  loader: async ({ params }) => {
     const surahId = parseSurahId(params.surahId)
     const surah = getSurahById(surahId)
 
@@ -14,21 +14,21 @@ export const Route = createFileRoute('/surah/$surahId')({
 
     return {
       surah,
-      verses: getVersesBySurah(surahId),
+      verses: await getVersesBySurah(surahId),
     }
   },
   head: ({ loaderData }) => {
     const surah = loaderData?.surah
     if (!surah) {
       return {
-        meta: [{ title: 'Surah — Quran0' }],
+        meta: [{ title: 'Surah - Quran0' }],
       }
     }
 
     return {
       meta: [
         {
-          title: `Surah ${surah.nameSimple} (${surah.banglaName}) — Quran0`,
+          title: `Surah ${surah.nameSimple} (${surah.banglaName}) - Quran0`,
         },
         {
           name: 'description',
