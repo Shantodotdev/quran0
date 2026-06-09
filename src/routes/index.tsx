@@ -40,19 +40,27 @@ function Home() {
         </p>
       </header>
 
-      <section className="grid gap-3 rounded-lg border border-(--app-border) bg-(--app-surface) p-3 shadow-sm">
-        <label className="grid gap-1 text-sm font-medium text-slate-300">
-          Sort
-          <select
-            value={sortMode}
-            onChange={(event) => setSortMode(event.target.value as SortMode)}
-            className="min-h-11 rounded-md border border-slate-700 bg-(--app-control) px-3 text-base text-slate-100 outline-none focus:border-emerald-500"
+      <section className="flex gap-1 rounded-xl bg-(--app-surface) p-1 shadow-sm ring-1 ring-(--app-border)">
+        {(
+          [
+            { value: 'surah-asc', label: 'Default' },
+            { value: 'easy-hard', label: 'Easiest' },
+            { value: 'hard-easy', label: 'Hardest' },
+          ] as { value: SortMode; label: string }[]
+        ).map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => setSortMode(option.value)}
+            className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+              sortMode === option.value
+                ? 'bg-(--app-control) text-slate-100 shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
           >
-            <option value="surah-asc">First to last surah</option>
-            <option value="easy-hard">Easiest to hardest</option>
-            <option value="hard-easy">Hardest to easiest</option>
-          </select>
-        </label>
+            {option.label}
+          </button>
+        ))}
       </section>
 
       <SurahList surahs={surahs} />
