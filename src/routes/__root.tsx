@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 
 import { AppBottomNav } from '#/components/app-bottom-nav'
 import { AppNavbar } from '#/components/app-navbar'
+import { PwaInstallPrompt } from '#/components/pwa-install-prompt'
 import { useThemeStore } from '#/stores/theme'
 import appCss from '../styles.css?url'
 
@@ -16,6 +17,22 @@ export const Route = createRootRoute({
       {
         name: 'viewport',
         content: 'width=device-width, initial-scale=1',
+      },
+      {
+        name: 'theme-color',
+        content: '#0d1117',
+      },
+      {
+        name: 'apple-mobile-web-app-capable',
+        content: 'yes',
+      },
+      {
+        name: 'apple-mobile-web-app-status-bar-style',
+        content: 'black-translucent',
+      },
+      {
+        name: 'apple-mobile-web-app-title',
+        content: 'Quran0',
       },
       {
         title: 'Quran0 — Read the Quran Online',
@@ -36,8 +53,12 @@ export const Route = createRootRoute({
         href: appCss,
       },
       {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Pacifico&display=swap',
+        rel: 'manifest',
+        href: '/manifest.webmanifest',
+      },
+      {
+        rel: 'apple-touch-icon',
+        href: '/apple-touch-icon.png',
       },
     ],
     scripts: [
@@ -73,6 +94,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
             {children}
           </main>
+          <PwaInstallPrompt />
           <AppBottomNav />
         </div>
         <Analytics />
