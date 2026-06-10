@@ -1,14 +1,15 @@
 import { Search } from 'lucide-react'
 import { ThemeSelector } from './theme-selector'
+import { Link } from '@tanstack/react-router'
 
 export function AppNavbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-(--app-border) bg-(--app-bg)">
       <nav className="mx-auto flex h-20 max-w-2xl items-center justify-between px-4 sm:px-6">
-        <a href="/" className="flex items-center gap-2.5">
+        <Link to="/" className="flex items-center gap-2.5">
           <img src="/logo.png" alt="Quran0" className="h-14 w-14" />
           <span className="text-xl font-semibold tracking-tight">Quran0</span>
-        </a>
+        </Link>
 
         <div className="flex items-center gap-1">
           <button
