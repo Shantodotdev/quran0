@@ -1,21 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
+import type { Theme } from '#/stores/theme'
+import { useThemeStore } from '#/stores/theme'
 
-const themes = [
+const themes: { value: Theme; label: string; color: string }[] = [
   { value: 'dark', label: 'Dark', color: '#0d1117' },
   { value: 'white', label: 'White', color: '#f8f9fa' },
   { value: 'sepia', label: 'Sepia', color: '#f5e6c8' },
   { value: 'green', label: 'Green', color: '#1b4332' },
-] as const
-
-type Theme = (typeof themes)[number]['value']
+]
 
 export function ThemeSelector() {
   const [visible, setVisible] = useState(false)
   const [closing, setClosing] = useState(false)
-  const [theme, setTheme] = useState<Theme>('dark')
+  const theme = useThemeStore((s) => s.theme)
+  const setTheme = useThemeStore((s) => s.setTheme)
   const menuRef = useRef<HTMLDivElement>(null)
-
-  const current = themes.find((t) => t.value === theme)!
 
   function open() {
     setVisible(true)
@@ -52,13 +51,20 @@ export function ThemeSelector() {
       <button
         type="button"
         onClick={() => (visible ? close() : open())}
-        className="flex h-9 items-center gap-2 rounded-full bg-(--app-surface) pl-3 pr-4 text-sm text-slate-300 transition-colors hover:text-slate-200 active:scale-95"
+        className="flex h-9 items-center gap-2 rounded-full border border-(--app-border) bg-(--app-control) pl-3 pr-4 text-sm font-medium text-(--app-text-secondary) shadow-sm transition-colors hover:bg-(--app-hover-bg) hover:text-(--app-text-primary) active:scale-95"
       >
         <span
-          className="size-3.5 rounded-full ring-1 ring-white/10"
-          style={{ backgroundColor: current.color }}
+          className="size-3.5 rounded-full ring-2 ring-(--app-text-tertiary)"
+          style={{ backgroundColor: 'var(--app-theme-swatch)' }}
         />
-        <span>{current.label}</span>
+        {themes.map((item) => (
+          <span
+            key={item.value}
+            className={`theme-selector-label theme-selector-label-${item.value}`}
+          >
+            {item.label}
+          </span>
+        ))}
       </button>
 
       {visible && (
@@ -75,15 +81,17 @@ export function ThemeSelector() {
                 setTheme(t.value)
                 close()
               }}
-              className={`flex w-full items-center gap-3 px-3 py-2.5 text-sm transition-colors hover:bg-(--app-surface) ${
+              className={`flex w-full items-center gap-3 px-3 py-2.5 text-sm transition-colors hover:bg-(--app-hover-bg) ${
                 theme === t.value
-                  ? 'bg-(--app-surface) text-slate-200'
-                  : 'text-slate-400'
+                  ? 'bg-(--app-hover-bg) text-(--app-text-primary)'
+                  : 'text-(--app-text-tertiary)'
               }`}
             >
               <span
                 className={`size-4 shrink-0 rounded-full ring-1 ${
-                  theme === t.value ? 'ring-2 ring-slate-400' : 'ring-white/10'
+                  theme === t.value
+                    ? 'ring-2 ring-(--app-text-primary)'
+                    : 'ring-(--app-text-tertiary)'
                 }`}
                 style={{ backgroundColor: t.color }}
               />
