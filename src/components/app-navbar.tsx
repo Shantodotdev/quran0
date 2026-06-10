@@ -7,7 +7,7 @@ export function AppNavbar() {
       <nav className="mx-auto flex h-20 max-w-2xl items-center justify-between px-4 sm:px-6">
         <a href="/" className="flex items-center gap-2.5">
           <img src="/logo.png" alt="Quran0" className="h-14 w-14" />
-          <span className="font-['Pacifico'] text-xl">Quran0</span>
+          <span className="text-xl font-semibold tracking-tight">Quran0</span>
         </a>
 
         <div className="flex items-center gap-1">
