@@ -2,7 +2,7 @@ import { Search } from 'lucide-react'
 import { ThemeSelector } from './theme-selector'
 import { Link } from '@tanstack/react-router'
 
-export function AppNavbar() {
+export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-(--app-border) bg-(--app-bg)">
       <nav className="mx-auto flex h-20 max-w-2xl items-center justify-between px-4 sm:px-6">

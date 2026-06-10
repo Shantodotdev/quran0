@@ -1,7 +1,7 @@
 import { Link, useRouterState } from '@tanstack/react-router'
 import { Activity, BookOpen } from 'lucide-react'
 
-export function AppBottomNav() {
+export function BottomNav() {
   const pathname = useRouterState({
     select: (state) => state.location.pathname,
   })

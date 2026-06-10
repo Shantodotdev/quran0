@@ -2,8 +2,8 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import { Analytics } from '@vercel/analytics/react'
 import { useEffect } from 'react'
 
-import { AppBottomNav } from '#/components/app-bottom-nav'
-import { AppNavbar } from '#/components/app-navbar'
+import { BottomNav } from '#/components/bottom-nav'
+import { Navbar } from '#/components/navbar'
 import { PwaInstallPrompt } from '#/components/pwa-install-prompt'
 import { useThemeStore } from '#/stores/theme'
 import appCss from '../styles.css?url'
@@ -90,12 +90,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body suppressHydrationWarning>
         <ThemeSync />
         <div className="min-h-screen bg-(--app-bg) text-(--app-text-primary)">
-          <AppNavbar />
+          <Navbar />
           <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
             {children}
           </main>
           <PwaInstallPrompt />
-          <AppBottomNav />
+          <BottomNav />
         </div>
         <Analytics />
         <Scripts />
