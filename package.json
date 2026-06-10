@@ -29,7 +29,8 @@
     "nitro": "^3.0.260603-beta",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.16",
