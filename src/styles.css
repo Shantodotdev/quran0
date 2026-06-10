@@ -5,12 +5,92 @@
   --animate-dropdown-out: dropdown-out 0.15s ease-in forwards;
 }
 
-:root {
+:root,
+[data-theme='dark'] {
   --app-bg: #0d1117;
   --app-surface: #151b23;
   --app-surface-raised: #11161d;
   --app-control: #0d1117;
   --app-border: #1e293b;
+  --app-text-primary: #f1f5f9;
+  --app-text-secondary: #cbd5e1;
+  --app-text-tertiary: #94a3b8;
+  --app-text-muted: #64748b;
+  --app-accent: #34d399;
+  --app-accent-active: #10b981;
+  --app-accent-soft: #12382f;
+  --app-accent-bg: #10b981;
+  --app-accent-text: #020617;
+  --app-hover-bg: #1e293b;
+  --app-theme-swatch: #0d1117;
+}
+
+[data-theme='white'] {
+  --app-bg: #ffffff;
+  --app-surface: #f1f5f9;
+  --app-surface-raised: #ffffff;
+  --app-control: #e2e8f0;
+  --app-border: #cbd5e1;
+  --app-text-primary: #0f172a;
+  --app-text-secondary: #1e293b;
+  --app-text-tertiary: #334155;
+  --app-text-muted: #64748b;
+  --app-accent: #059669;
+  --app-accent-active: #047857;
+  --app-accent-soft: #d1fae5;
+  --app-accent-bg: #059669;
+  --app-accent-text: #ffffff;
+  --app-hover-bg: #e2e8f0;
+  --app-theme-swatch: #f8f9fa;
+}
+
+[data-theme='sepia'] {
+  --app-bg: #f5e6c8;
+  --app-surface: #efe1c4;
+  --app-surface-raised: #f5e6c8;
+  --app-control: #e8d5af;
+  --app-border: #d4c4a6;
+  --app-text-primary: #3b2f1e;
+  --app-text-secondary: #5c4d35;
+  --app-text-tertiary: #7a6b52;
+  --app-text-muted: #6f6048;
+  --app-accent: #8b6914;
+  --app-accent-active: #7a5d12;
+  --app-accent-soft: #ead9aa;
+  --app-accent-bg: #8b6914;
+  --app-accent-text: #f5e6c8;
+  --app-hover-bg: #e8d5af;
+  --app-theme-swatch: #f5e6c8;
+}
+
+[data-theme='green'] {
+  --app-bg: #09281f;
+  --app-surface: #10362a;
+  --app-surface-raised: #0b2d23;
+  --app-control: #174334;
+  --app-border: #245846;
+  --app-text-primary: #f2ead3;
+  --app-text-secondary: #d5d8c8;
+  --app-text-tertiary: #aab9aa;
+  --app-text-muted: #899d8f;
+  --app-accent: #d9b84f;
+  --app-accent-active: #e8c85f;
+  --app-accent-soft: #2a4938;
+  --app-accent-bg: #d9b84f;
+  --app-accent-text: #09281f;
+  --app-hover-bg: #174334;
+  --app-theme-swatch: #09281f;
+}
+
+.theme-selector-label {
+  display: none;
+}
+
+[data-theme='dark'] .theme-selector-label-dark,
+[data-theme='white'] .theme-selector-label-white,
+[data-theme='sepia'] .theme-selector-label-sepia,
+[data-theme='green'] .theme-selector-label-green {
+  display: inline;
 }
 
 @font-face {
