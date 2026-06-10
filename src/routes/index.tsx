@@ -38,8 +38,8 @@ function Home() {
             onClick={() => setSortMode(option.value)}
             className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
               sortMode === option.value
-                ? 'bg-(--app-control) text-slate-100 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-(--app-control) text-(--app-text-primary) shadow-sm'
+                : 'text-(--app-text-secondary) hover:text-(--app-text-primary)'
             }`}
           >
             {option.label}
@@ -55,14 +55,14 @@ function Home() {
             params={{ surahId: String(surah.id) }}
             className="grid grid-cols-[auto_1fr] items-center gap-3 p-3"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-500/15 text-lg font-semibold text-emerald-300">
+            <span className="flex h-10 w-10 items-center justify-center rounded-md bg-(--app-accent-soft) text-lg font-semibold text-(--app-accent)">
               {surah.id}
             </span>
             <span className="min-w-0">
-              <span className="block truncate text-base font-semibold text-slate-100">
+              <span className="block truncate text-base font-semibold text-(--app-text-primary)">
                 {surah.nameSimple}
               </span>
-              <span className="mt-0.5 block truncate text-sm text-slate-400">
+              <span className="mt-0.5 block truncate text-sm text-(--app-text-tertiary)">
                 {surah.banglaName} | {surah.translatedNameBn}
               </span>
             </span>

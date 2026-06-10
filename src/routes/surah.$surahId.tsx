@@ -58,28 +58,28 @@ function SurahPage() {
       <header className="rounded-lg border border-(--app-border) bg-(--app-surface) p-4 shadow-sm">
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 text-sm text-emerald-400 transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-(--app-accent) transition-colors"
         >
           <ArrowLeft className="size-4" />
           <span>All Surahs</span>
         </Link>
         <div className="mt-3 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+            <p className="text-xs font-medium text-(--app-text-tertiary) uppercase tracking-wider">
               Surah {surah.id} · {surah.versesCount} Ayahs
             </p>
-            <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-slate-100">
+            <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-(--app-text-primary)">
               {surah.nameSimple}
             </h1>
-            <p className="mt-0.5 text-base text-slate-300" lang="bn">
+            <p className="mt-0.5 text-base text-(--app-text-secondary)" lang="bn">
               {surah.banglaName}
             </p>
-            <p className="mt-0.5 text-sm text-slate-500" lang="bn">
+            <p className="mt-0.5 text-sm text-(--app-text-tertiary)" lang="bn">
               {surah.translatedNameBn}
             </p>
           </div>
           <p
-            className="quran-arabic shrink-0 text-right text-3xl leading-tight text-slate-100"
+            className="quran-arabic shrink-0 text-right text-3xl leading-tight text-(--app-text-primary)"
             dir="rtl"
           >
             {surah.nameArabic}
@@ -91,21 +91,21 @@ function SurahPage() {
         {verses.map((verse) => (
           <article key={verse.verseKey} className="p-3">
             <div className="flex items-start justify-between gap-3">
-              <span className="rounded-md bg-(--app-surface-raised) px-2 py-1 text-sm font-semibold text-slate-300">
+              <span className="rounded-md bg-(--app-surface-raised) px-2 py-1 text-sm font-semibold text-(--app-text-secondary)">
                 {verse.verseKey}
               </span>
             </div>
             <p
-              className="quran-arabic mt-5 text-right text-[1.75rem] leading-relaxed text-slate-50"
+              className="quran-arabic mt-5 text-right text-[1.75rem] leading-relaxed text-(--app-text-primary)"
               dir="rtl"
               lang="ar"
             >
               {verse.arabicIndopak}
             </p>
-            <p className="mt-4 text-base leading-7 text-slate-200">
+            <p className="mt-4 text-base leading-7 text-(--app-text-secondary)">
               {verse.transliterationEn}
             </p>
-            <p className="mt-3 text-sm leading-7 text-slate-400" lang="bn">
+            <p className="mt-3 text-sm leading-7 text-(--app-text-muted)" lang="bn">
               {verse.translationBnTaisirul}
             </p>
           </article>

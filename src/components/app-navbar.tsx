@@ -13,7 +13,7 @@ export function AppNavbar() {
         <div className="flex items-center gap-1">
           <button
             type="button"
-            className="flex size-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-(--app-surface) hover:text-slate-200"
+            className="flex size-9 items-center justify-center rounded-lg text-(--app-text-tertiary) transition-colors hover:bg-(--app-surface) hover:text-(--app-text-primary)"
             aria-label="Search"
           >
             <Search className="size-5" />

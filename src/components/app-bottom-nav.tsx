@@ -36,7 +36,7 @@ function getNavItemClassName(isActive: boolean) {
   return [
     'flex min-h-12 items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors',
     isActive
-      ? 'bg-emerald-500 text-slate-950'
-      : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100',
+      ? 'bg-(--app-accent-bg) text-(--app-accent-text)'
+      : 'text-(--app-text-muted) hover:bg-(--app-hover-bg) hover:text-(--app-text-primary)',
   ].join(' ')
 }
