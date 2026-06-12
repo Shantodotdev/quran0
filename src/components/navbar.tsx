@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { Search, Settings } from 'lucide-react'
-import { ThemeSelector } from './theme-selector'
 import { SettingsSidebar } from './settings-sidebar'
 import { Link } from '@tanstack/react-router'
 
@@ -32,8 +31,6 @@ export function Navbar() {
           >
             <Settings className="size-5" />
           </button>
-
-          <ThemeSelector />
 
           <SettingsSidebar
             open={settingsOpen}

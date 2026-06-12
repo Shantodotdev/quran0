@@ -1,5 +1,6 @@
 import { Minus, Plus, X } from 'lucide-react'
 import { useSettingsStore } from '#/stores/settings'
+import { ThemeSelector } from './theme-selector'
 
 interface SettingsSidebarProps {
   open: boolean
@@ -164,6 +165,15 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
               onIncrease={() => setBengaliFontSize(bengaliFontSize + 1)}
               onDecrease={() => setBengaliFontSize(bengaliFontSize - 1)}
             />
+
+            <div className="h-px bg-(--app-border)" />
+
+            <section>
+              <span className="mb-2 block text-sm font-medium text-(--app-text-primary)">
+                Theme
+              </span>
+              <ThemeSelector />
+            </section>
 
             <div className="h-px bg-(--app-border)" />
 

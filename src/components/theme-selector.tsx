@@ -51,10 +51,10 @@ export function ThemeSelector() {
       <button
         type="button"
         onClick={() => (visible ? close() : open())}
-        className="flex h-9 items-center gap-2 rounded-full border border-(--app-border) bg-(--app-control) pl-3 pr-4 text-sm font-medium text-(--app-text-secondary) shadow-sm transition-colors hover:bg-(--app-hover-bg) hover:text-(--app-text-primary) active:scale-95"
+        className={`flex w-full items-center gap-2 rounded-xl bg-(--app-control) px-3 py-2.5 text-sm font-medium text-(--app-text-primary) transition-colors hover:bg-(--app-hover-bg)`}
       >
         <span
-          className="size-3.5 rounded-full ring-2 ring-(--app-text-tertiary)"
+          className="size-3.5 shrink-0 rounded-full ring-2 ring-(--app-text-tertiary)"
           style={{ backgroundColor: 'var(--app-theme-swatch)' }}
         />
         {themes.map((item) => (
@@ -69,7 +69,7 @@ export function ThemeSelector() {
 
       {visible && (
         <div
-          className={`absolute right-0 top-full z-50 mt-1.5 w-40 overflow-hidden rounded-xl bg-(--app-surface-raised) py-1 shadow-lg shadow-black/50 ring-1 ring-(--app-border) ${
+          className={`absolute left-0 top-full z-50 mt-1 w-full overflow-hidden rounded-xl bg-(--app-surface-raised) py-1 shadow-lg shadow-black/50 ring-1 ring-(--app-border) ${
             closing ? 'animate-dropdown-out' : 'animate-dropdown-in'
           }`}
         >
