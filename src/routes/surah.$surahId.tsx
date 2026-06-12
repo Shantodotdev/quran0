@@ -145,7 +145,7 @@ function SurahPage() {
   return (
     <>
       {/* Reading progress bar — full viewport width, pinned below navbar */}
-      <div className="sticky top-20 z-50 -mx-4 sm:-mx-6 w-screen">
+      <div className="sticky top-20 z-40 -mx-4 sm:-mx-6 w-screen">
         <div className="h-1 bg-(--app-surface-raised)">
           <div
             className="h-full rounded-full bg-(--app-accent) transition-[width] duration-200 ease-out"
