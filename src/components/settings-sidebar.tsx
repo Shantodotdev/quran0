@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Minus, Plus, X } from 'lucide-react'
+import { Minus, Plus, RotateCcw, X } from 'lucide-react'
 import { useSettingsStore } from '#/stores/settings'
 import { ThemeSelector } from './theme-selector'
 
@@ -116,6 +116,7 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
     setBengaliFontSize,
     setDisplayEnglishSpelling,
     setDisplayBengaliMeaning,
+    resetSettings,
   } = useSettingsStore()
 
   // --- drag-to-close state ---
@@ -264,6 +265,17 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
                 onChange={setDisplayBengaliMeaning}
               />
             </section>
+
+            <div className="h-px bg-(--app-border)" />
+
+            <button
+              type="button"
+              onClick={resetSettings}
+              className="flex items-center justify-center gap-2 rounded-xl bg-(--app-control) px-3 py-2.5 text-sm font-medium text-(--app-text-primary) transition-colors hover:bg-(--app-hover-bg)"
+            >
+              <RotateCcw className="size-4" />
+              Reset to Default
+            </button>
           </div>
         </div>
       </div>

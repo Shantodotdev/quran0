@@ -13,6 +13,7 @@ export interface SettingsState {
   setBengaliFontSize: (size: number) => void
   setDisplayEnglishSpelling: (display: boolean) => void
   setDisplayBengaliMeaning: (display: boolean) => void
+  resetSettings: () => void
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -31,6 +32,14 @@ export const useSettingsStore = create<SettingsState>()(
         set({ displayEnglishSpelling: display }),
       setDisplayBengaliMeaning: (display) =>
         set({ displayBengaliMeaning: display }),
+      resetSettings: () =>
+        set({
+          arabicFontSize: 26,
+          englishFontSize: 16,
+          bengaliFontSize: 16,
+          displayEnglishSpelling: true,
+          displayBengaliMeaning: true,
+        }),
     }),
     {
       name: 'quran0-settings',
