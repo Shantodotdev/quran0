@@ -34,7 +34,7 @@ const config = defineConfig({
     nitro({
       modules: [
         (nitroApp) => {
-          nitroApp.hooks.hook('prerender:done', async () => {
+          nitroApp.hooks.hook('compiled', async () => {
             await generatePwa(nitroApp.options.output.publicDir)
           })
         },

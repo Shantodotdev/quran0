@@ -106,9 +106,10 @@ Path aliases are configured in `package.json` and `tsconfig.json`:
 
 - TanStack Start prerenders `/`, `/progress`, and `/surah/1` through
   `/surah/114` into Nitro's public production output.
-- `vite.config.ts` registers a Nitro `prerender:done` hook. The hook calls
+- `vite.config.ts` registers a Nitro `compiled` hook. The hook calls
   `scripts/generate-pwa.ts` with `nitro.options.output.publicDir`, ensuring
-  Workbox generates `sw.js` before Vercel packages the deployment artifact.
+  Workbox generates `sw.js` after Nitro finishes constructing the provider's
+  deployment output but before the host uploads it.
 - The generated Workbox service worker precaches all public production files,
   including every prerendered page and lazy Quran data chunk.
 - Do not add or edit a source `public/sw.js`. Workbox generates the production

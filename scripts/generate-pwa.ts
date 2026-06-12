@@ -2,7 +2,7 @@ import path from 'node:path'
 
 import { generateSW } from 'workbox-build'
 
-/** Generates the production service worker before Nitro packages deployment output. */
+/** Generates the service worker after Nitro finishes the provider output. */
 export async function generatePwa(publicDirectory: string) {
   const serviceWorkerPath = path.join(publicDirectory, 'sw.js')
   const { count, size, warnings } = await generateSW({
