@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 
@@ -99,9 +99,7 @@ function SurahPage() {
   const displayEnglishSpelling = useSettingsStore(
     (s) => s.displayEnglishSpelling,
   )
-  const displayBengaliMeaning = useSettingsStore(
-    (s) => s.displayBengaliMeaning,
-  )
+  const displayBengaliMeaning = useSettingsStore((s) => s.displayBengaliMeaning)
 
   // Sync font sizes and display toggles to CSS custom properties.
   // The inline <script> in head sets these before first paint to avoid a
@@ -112,8 +110,14 @@ function SurahPage() {
     root.style.setProperty('--arabic-fs', `${arabicFontSize}px`)
     root.style.setProperty('--english-fs', `${englishFontSize}px`)
     root.style.setProperty('--bengali-fs', `${bengaliFontSize}px`)
-    root.style.setProperty('--show-en', displayEnglishSpelling ? 'block' : 'none')
-    root.style.setProperty('--show-bn', displayBengaliMeaning ? 'block' : 'none')
+    root.style.setProperty(
+      '--show-en',
+      displayEnglishSpelling ? 'block' : 'none',
+    )
+    root.style.setProperty(
+      '--show-bn',
+      displayBengaliMeaning ? 'block' : 'none',
+    )
   }, [
     arabicFontSize,
     englishFontSize,
@@ -122,8 +126,33 @@ function SurahPage() {
     displayBengaliMeaning,
   ])
 
+  // Track scroll progress through the surah content.
+  const [progress, setProgress] = useState(0)
+
+  useEffect(() => {
+    function onScroll() {
+      const scrollTop = window.scrollY
+      const docHeight = document.documentElement.scrollHeight
+      const winHeight = window.innerHeight
+      const maxScroll = docHeight - winHeight
+      setProgress(maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 1)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
     <>
+      {/* Reading progress bar — full viewport width, pinned below navbar */}
+      <div className="sticky top-20 z-50 -mx-4 sm:-mx-6 w-screen">
+        <div className="h-1 bg-(--app-surface-raised)">
+          <div
+            className="h-full rounded-full bg-(--app-accent) transition-[width] duration-200 ease-out"
+            style={{ width: `${progress * 100}%` }}
+          />
+        </div>
+      </div>
       {/* Surah header: back link, metadata, names */}
       <header className="rounded-lg border border-(--app-border) bg-(--app-surface) p-4 shadow-sm">
         <Link
