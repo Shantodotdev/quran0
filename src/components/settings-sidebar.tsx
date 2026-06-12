@@ -8,6 +8,10 @@ interface SettingsSidebarProps {
   onClose: () => void
 }
 
+/**
+ * Numeric stepper with minus/plus buttons for adjusting a font-size value.
+ * Clamps between min and max; disables the corresponding button at each bound.
+ */
 function SizeStepper({
   label,
   value,
@@ -55,6 +59,10 @@ function SizeStepper({
   )
 }
 
+/**
+ * Accessible toggle switch (role="switch") that renders a sliding circle
+ * and an accent/control background based on the checked state.
+ */
 function Toggle({
   label,
   checked,
@@ -88,6 +96,14 @@ function Toggle({
   )
 }
 
+/**
+ * Slide-in settings panel from the right edge of the screen.
+ *
+ * - Locks body scroll while open.
+ * - Supports drag-to-close via pointer events: dragging the panel right
+ *   beyond 100px fires onClose; otherwise it snaps back in place.
+ * - The overlay darkens the background and can also be tapped to close.
+ */
 export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
   const {
     arabicFontSize,
@@ -102,14 +118,17 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
     setDisplayBengaliMeaning,
   } = useSettingsStore()
 
+  // --- drag-to-close state ---
   const panelRef = useRef<HTMLDivElement>(null)
-  const dragX = useRef(0)
-  const [translateX, setTranslateX] = useState(0)
+  const dragX = useRef(0) // pointer X when the drag started
+  const [translateX, setTranslateX] = useState(0) // live pixel offset
   const [dragging, setDragging] = useState(false)
 
+  // --- lock body scroll while sidebar is open ---
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden'
+      // reset drag position each time it opens
       setTranslateX(0)
     }
     return () => {
@@ -117,18 +136,24 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
     }
   }, [open])
 
+  /** Record the starting pointer position and begin tracking the drag. */
   function handlePointerDown(e: React.PointerEvent) {
     setDragging(true)
     dragX.current = e.clientX
     e.currentTarget.setPointerCapture(e.pointerId)
   }
 
+  /** Calculate how far the panel has been dragged to the right (clamped ≥ 0). */
   function handlePointerMove(e: React.PointerEvent) {
     if (!dragging) return
     const delta = e.clientX - dragX.current
     setTranslateX(Math.max(0, delta))
   }
 
+  /**
+   * End the drag. If the panel was dragged past 100px, close it.
+   * Otherwise snap it back to its resting position.
+   */
   function handlePointerUp(e: React.PointerEvent) {
     if (!dragging) return
     setDragging(false)
@@ -142,7 +167,7 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay — tap to close */}
       <div
         className={`fixed inset-0 z-60 bg-black/50 transition-opacity duration-350 ease-out ${
           open ? 'opacity-100' : 'pointer-events-none opacity-0'
@@ -150,7 +175,7 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
         onClick={onClose}
       />
 
-      {/* Panel */}
+      {/* Panel — draggable slide-in container */}
       <div
         ref={panelRef}
         onPointerDown={handlePointerDown}
@@ -158,18 +183,16 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
         onPointerUp={handlePointerUp}
         className={`fixed right-0 top-0 z-70 flex h-full w-80 flex-col border-l border-(--app-border) bg-(--app-bg) shadow-2xl ${
           dragging
-            ? ''
+            ? '' // manual transform when dragging (no transition)
             : open
               ? 'translate-x-0 transition-transform duration-350 ease-out'
               : 'translate-x-full transition-transform duration-350 ease-out'
         }`}
         style={
-          dragging
-            ? { transform: `translateX(${translateX}px)` }
-            : undefined
+          dragging ? { transform: `translateX(${translateX}px)` } : undefined
         }
       >
-        {/* Header */}
+        {/* Header — title and close button */}
         <div className="flex items-center justify-between border-b border-(--app-border) px-4 py-4">
           <h2 className="text-lg font-semibold text-(--app-text-primary)">
             Settings
@@ -184,7 +207,7 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
           </button>
         </div>
 
-        {/* Body */}
+        {/* Scrollable body — font steppers, theme selector, toggles */}
         <div className="flex-1 overflow-y-auto px-4 py-5">
           <div className="flex flex-col gap-6">
             <SizeStepper
