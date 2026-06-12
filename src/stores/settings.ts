@@ -20,8 +20,8 @@ export const useSettingsStore = create<SettingsState>()(
   persist(
     (set) => ({
       arabicFontSize: 26,
-      englishFontSize: 16,
-      bengaliFontSize: 16,
+      englishFontSize: 15,
+      bengaliFontSize: 14,
       displayEnglishSpelling: true,
       displayBengaliMeaning: true,
 
@@ -35,8 +35,8 @@ export const useSettingsStore = create<SettingsState>()(
       resetSettings: () =>
         set({
           arabicFontSize: 26,
-          englishFontSize: 16,
-          bengaliFontSize: 16,
+          englishFontSize: 15,
+          bengaliFontSize: 14,
           displayEnglishSpelling: true,
           displayBengaliMeaning: true,
         }),
