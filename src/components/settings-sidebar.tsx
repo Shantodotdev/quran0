@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Minus, Plus, X } from 'lucide-react'
 import { useSettingsStore } from '#/stores/settings'
 import { ThemeSelector } from './theme-selector'
@@ -102,14 +102,43 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
     setDisplayBengaliMeaning,
   } = useSettingsStore()
 
+  const panelRef = useRef<HTMLDivElement>(null)
+  const dragX = useRef(0)
+  const [translateX, setTranslateX] = useState(0)
+  const [dragging, setDragging] = useState(false)
+
   useEffect(() => {
     if (open) {
       document.body.style.overflow = 'hidden'
+      setTranslateX(0)
     }
     return () => {
       document.body.style.overflow = ''
     }
   }, [open])
+
+  function handlePointerDown(e: React.PointerEvent) {
+    setDragging(true)
+    dragX.current = e.clientX
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }
+
+  function handlePointerMove(e: React.PointerEvent) {
+    if (!dragging) return
+    const delta = e.clientX - dragX.current
+    setTranslateX(Math.max(0, delta))
+  }
+
+  function handlePointerUp(e: React.PointerEvent) {
+    if (!dragging) return
+    setDragging(false)
+    e.currentTarget.releasePointerCapture(e.pointerId)
+
+    if (translateX > 100) {
+      onClose()
+    }
+    setTranslateX(0)
+  }
 
   return (
     <>
@@ -123,9 +152,22 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
 
       {/* Panel */}
       <div
-        className={`fixed right-0 top-0 z-70 flex h-full w-80 flex-col border-l border-(--app-border) bg-(--app-bg) shadow-2xl transition-transform duration-350 ease-out ${
-          open ? 'translate-x-0' : 'translate-x-full'
+        ref={panelRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        className={`fixed right-0 top-0 z-70 flex h-full w-80 flex-col border-l border-(--app-border) bg-(--app-bg) shadow-2xl ${
+          dragging
+            ? ''
+            : open
+              ? 'translate-x-0 transition-transform duration-350 ease-out'
+              : 'translate-x-full transition-transform duration-350 ease-out'
         }`}
+        style={
+          dragging
+            ? { transform: `translateX(${translateX}px)` }
+            : undefined
+        }
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-(--app-border) px-4 py-4">
