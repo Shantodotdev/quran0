@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Minus, Plus, X } from 'lucide-react'
 import { useSettingsStore } from '#/stores/settings'
 import { ThemeSelector } from './theme-selector'
@@ -100,6 +101,15 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
     setDisplayEnglishSpelling,
     setDisplayBengaliMeaning,
   } = useSettingsStore()
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [open])
 
   return (
     <>
