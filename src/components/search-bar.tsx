@@ -1,13 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { Search, X } from 'lucide-react'
+import { Search, X, Clock, Sparkles } from 'lucide-react'
 
 import { getAllSurahs } from '#/data/quran/quran-data'
+import type { QuranSurah } from '#/data/quran/types'
 
 interface SearchBarProps {
   open: boolean
   onClose: () => void
 }
+
+const RECENT_KEY = 'quran0-recent-searches'
+const MAX_RECENT = 5
+
+const SUGGESTED_SURAHS = [1, 36, 55, 112] // Al-Fatihah, Ya-Sin, Ar-Rahman, Al-Ikhlas,
 
 /**
  * Search panel that slides down below the navbar. Filters all 114 surahs
@@ -18,28 +24,48 @@ interface SearchBarProps {
  */
 export function SearchBar({ open, onClose }: SearchBarProps) {
   const [query, setQuery] = useState('')
+  const [recent, setRecent] = useState<number[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
 
   // Filter surahs against the query — runs synchronously on every keystroke
   // since 114 items is trivially fast.
   const results = useMemo(() => {
-    if (!query.trim()) return getAllSurahs()
+    if (!query.trim()) return []
 
     const q = query.toLowerCase()
-    return getAllSurahs().filter(
-      (s) =>
-        s.nameSimple.toLowerCase().includes(q) ||
-        s.banglaName.toLowerCase().includes(q) ||
-        s.translatedNameBn.toLowerCase().includes(q) ||
-        s.nameArabic.includes(query), // Arabic is already in its own script
-    )
+    return getAllSurahs()
+      .filter(
+        (s) =>
+          s.nameSimple.toLowerCase().includes(q) ||
+          s.banglaName.toLowerCase().includes(q) ||
+          s.translatedNameBn.toLowerCase().includes(q) ||
+          s.nameArabic.includes(query),
+      )
+      .slice(0, 30)
   }, [query])
+
+  const suggestions = useMemo<QuranSurah[]>(
+    () =>
+      SUGGESTED_SURAHS.map((id) => getAllSurahs().find((s) => s.id === id)!),
+    [],
+  )
+
+  const recentSurahs = useMemo<QuranSurah[]>(
+    () => recent.map((id) => getAllSurahs().find((s) => s.id === id)!),
+    [recent],
+  )
+
+  // Load recent searches from localStorage on mount.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(RECENT_KEY)
+      if (raw) setRecent(JSON.parse(raw))
+    } catch {}
+  }, [])
 
   // Auto-focus the input when the panel opens.
   useEffect(() => {
     if (open) {
-      // Small delay so the transition starts before focus triggers the
-      // virtual keyboard on mobile.
       const id = setTimeout(() => inputRef.current?.focus(), 100)
       return () => clearTimeout(id)
     }
@@ -63,6 +89,28 @@ export function SearchBar({ open, onClose }: SearchBarProps) {
     }
   }, [open])
 
+  // Lock body scroll while the panel is open.
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden'
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [open])
+
+  function handleResultClick(surahId: number) {
+    const next = [surahId, ...recent.filter((id) => id !== surahId)].slice(
+      0,
+      MAX_RECENT,
+    )
+    setRecent(next)
+    try {
+      localStorage.setItem(RECENT_KEY, JSON.stringify(next))
+    } catch {}
+    onClose()
+  }
+
   return (
     <>
       {/* Overlay */}
@@ -75,7 +123,7 @@ export function SearchBar({ open, onClose }: SearchBarProps) {
 
       {/* Panel — sits below the navbar in stacking order (z-45 < navbar z-50) */}
       <div
-        className={`fixed left-2 right-2 top-[5.5rem] z-45 mx-auto max-w-[36rem] overflow-hidden rounded-2xl border border-(--app-border) bg-(--app-bg) shadow-2xl transition-all duration-300 ease-out sm:left-4 sm:right-4 ${
+        className={`fixed left-2 right-2 top-22 z-45 mx-auto flex max-w-xl flex-col overflow-hidden rounded-2xl border border-(--app-border) bg-(--app-bg) shadow-2xl transition-all duration-300 ease-out sm:left-4 sm:right-4 ${
           open
             ? 'translate-y-0 opacity-100'
             : 'pointer-events-none -translate-y-full opacity-0'
@@ -104,37 +152,166 @@ export function SearchBar({ open, onClose }: SearchBarProps) {
           )}
         </div>
 
-        {/* Results */}
-        <div className="max-h-[50vh] overflow-y-auto">
-          {results.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-(--app-text-muted)">
-              No surahs match "{query}"
-            </p>
+        {/* Body — has a min-height so a single result still feels like a modal */}
+        <div className="min-h-72 max-h-[60vh] overflow-y-auto">
+          {query.trim() === '' ? (
+            <EmptyState
+              recent={recentSurahs}
+              suggestions={suggestions}
+              onSelect={handleResultClick}
+            />
+          ) : results.length === 0 ? (
+            <NoResults query={query} />
           ) : (
-            results.map((surah) => (
-              <Link
-                key={surah.id}
-                to="/surah/$surahId"
-                params={{ surahId: String(surah.id) }}
-                onClick={onClose}
-                className="flex items-center gap-3 border-b border-(--app-border) px-4 py-3 transition-colors last:border-b-0 hover:bg-(--app-hover-bg)"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-(--app-accent-soft) text-sm font-semibold text-(--app-accent)">
-                  {surah.id}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-(--app-text-primary)">
-                    {surah.nameSimple}
-                  </p>
-                  <p className="truncate text-xs text-(--app-text-tertiary)">
-                    {surah.banglaName} | {surah.translatedNameBn}
-                  </p>
-                </div>
-              </Link>
-            ))
+            <ResultsList results={results} onSelect={handleResultClick} />
           )}
         </div>
       </div>
     </>
+  )
+}
+
+function EmptyState({
+  recent,
+  suggestions,
+  onSelect,
+}: {
+  recent: QuranSurah[]
+  suggestions: QuranSurah[]
+  onSelect: (id: number) => void
+}) {
+  return (
+    <div className="flex flex-col gap-5 p-4">
+      {/* Tip block */}
+      <div className="flex flex-col gap-2 rounded-xl bg-(--app-control) p-4">
+        <div className="flex items-center gap-2 text-sm font-semibold text-(--app-text-primary)">
+          <Search className="size-4 text-(--app-accent)" />
+          <span>Search by surah name</span>
+        </div>
+        <p className="text-sm leading-relaxed text-(--app-text-secondary)">
+          Type the name in{' '}
+          <span className="font-medium text-(--app-text-primary)">English</span>
+          , <span className="font-medium text-(--app-text-primary)">বাংলা</span>
+          , or{' '}
+          <span className="font-medium text-(--app-text-primary)">العربية</span>
+          .
+        </p>
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          <ExampleChip label="Al-Fatihah" />
+          <ExampleChip label="ফাতিহা" lang="bn" />
+          <ExampleChip label="الفاتحة" lang="ar" />
+        </div>
+      </div>
+
+      {/* Recent searches */}
+      {recent.length > 0 && (
+        <section>
+          <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-(--app-text-tertiary)">
+            <Clock className="size-3.5" />
+            <span>Recent</span>
+          </div>
+          <div className="grid gap-1">
+            {recent.map((surah) => (
+              <ResultRow
+                key={surah.id}
+                surah={surah}
+                onClick={() => onSelect(surah.id)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Suggestions */}
+      <section>
+        <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-(--app-text-tertiary)">
+          <Sparkles className="size-3.5" />
+          <span>Popular</span>
+        </div>
+        <div className="grid gap-1">
+          {suggestions.map((surah) => (
+            <ResultRow
+              key={surah.id}
+              surah={surah}
+              onClick={() => onSelect(surah.id)}
+            />
+          ))}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function NoResults({ query }: { query: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 px-4 py-10 text-center">
+      <Search className="size-8 text-(--app-text-muted)" />
+      <p className="text-sm font-medium text-(--app-text-primary)">
+        No surahs match "{query}"
+      </p>
+      <p className="text-xs text-(--app-text-tertiary)">
+        Try a partial name in English, বাংলা, or العربية
+      </p>
+    </div>
+  )
+}
+
+function ResultsList({
+  results,
+  onSelect,
+}: {
+  results: ReturnType<typeof getAllSurahs>
+  onSelect: (id: number) => void
+}) {
+  return (
+    <div className="grid gap-0.5 p-2">
+      {results.map((surah) => (
+        <ResultRow
+          key={surah.id}
+          surah={surah}
+          onClick={() => onSelect(surah.id)}
+        />
+      ))}
+    </div>
+  )
+}
+
+function ResultRow({
+  surah,
+  onClick,
+}: {
+  surah: QuranSurah
+  onClick: () => void
+}) {
+  return (
+    <Link
+      to="/surah/$surahId"
+      params={{ surahId: String(surah.id) }}
+      onClick={onClick}
+      className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-(--app-hover-bg)"
+    >
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-(--app-accent-soft) text-sm font-semibold text-(--app-accent)">
+        {surah.id}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-(--app-text-primary)">
+          {surah.nameSimple}
+        </p>
+        <p className="truncate text-xs text-(--app-text-tertiary)">
+          {surah.banglaName} | {surah.translatedNameBn}
+        </p>
+      </div>
+    </Link>
+  )
+}
+
+function ExampleChip({ label, lang }: { label: string; lang?: string }) {
+  return (
+    <span
+      lang={lang}
+      className="rounded-full bg-(--app-surface-raised) px-2.5 py-1 text-xs text-(--app-text-secondary)"
+    >
+      {label}
+    </span>
   )
 }
