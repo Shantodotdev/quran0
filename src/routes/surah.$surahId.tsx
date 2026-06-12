@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 
 import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
 import { useSettingsStore } from '#/stores/settings'
+import { ReadingProgressBar } from '#/components/reading-progress-bar'
 
 /**
  * Route: /surah/$surahId
@@ -126,33 +127,9 @@ function SurahPage() {
     displayBengaliMeaning,
   ])
 
-  // Track scroll progress through the surah content.
-  const [progress, setProgress] = useState(0)
-
-  useEffect(() => {
-    function onScroll() {
-      const scrollTop = window.scrollY
-      const docHeight = document.documentElement.scrollHeight
-      const winHeight = window.innerHeight
-      const maxScroll = docHeight - winHeight
-      setProgress(maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 1)
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
   return (
     <>
-      {/* Reading progress bar — full viewport width, pinned below navbar */}
-      <div className="sticky top-20 z-40 -mx-4 sm:-mx-6 w-screen">
-        <div className="h-1 bg-(--app-surface-raised)">
-          <div
-            className="h-full rounded-full bg-(--app-accent) transition-[width] duration-200 ease-out"
-            style={{ width: `${progress * 100}%` }}
-          />
-        </div>
-      </div>
+      <ReadingProgressBar />
       {/* Surah header: back link, metadata, names */}
       <header className="rounded-lg border border-(--app-border) bg-(--app-surface) p-4 shadow-sm">
         <Link
