@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Search, Settings } from 'lucide-react'
+import { SearchBar } from './search-bar'
 import { SettingsSidebar } from './settings-sidebar'
 import { Link } from '@tanstack/react-router'
 
 export function Navbar() {
+  const [searchOpen, setSearchOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   return (
@@ -17,6 +19,7 @@ export function Navbar() {
         <div className="flex items-center gap-1">
           <button
             type="button"
+            onClick={() => setSearchOpen(true)}
             className="flex size-9 items-center justify-center rounded-lg text-(--app-text-tertiary) transition-colors hover:bg-(--app-surface) hover:text-(--app-text-primary)"
             aria-label="Search"
           >
@@ -38,6 +41,11 @@ export function Navbar() {
           />
         </div>
       </nav>
+
+      <SearchBar
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+      />
     </header>
   )
 }
