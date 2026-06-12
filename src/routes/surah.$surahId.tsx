@@ -2,6 +2,7 @@ import { Link, createFileRoute, notFound } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 
 import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
+import { useSettingsStore } from '#/stores/settings'
 
 export const Route = createFileRoute('/surah/$surahId')({
   loader: async ({ params }) => {
@@ -52,6 +53,13 @@ function parseSurahId(value: string) {
 
 function SurahPage() {
   const { surah, verses } = Route.useLoaderData()
+  const {
+    arabicFontSize,
+    englishFontSize,
+    bengaliFontSize,
+    displayEnglishSpelling,
+    displayBengaliMeaning,
+  } = useSettingsStore()
 
   return (
     <>
@@ -71,7 +79,10 @@ function SurahPage() {
             <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-(--app-text-primary)">
               {surah.nameSimple}
             </h1>
-            <p className="mt-0.5 text-base text-(--app-text-secondary)" lang="bn">
+            <p
+              className="mt-0.5 text-base text-(--app-text-secondary)"
+              lang="bn"
+            >
               {surah.banglaName}
             </p>
             <p className="mt-0.5 text-sm text-(--app-text-tertiary)" lang="bn">
@@ -96,18 +107,30 @@ function SurahPage() {
               </span>
             </div>
             <p
-              className="quran-arabic mt-5 text-right text-[1.75rem] leading-relaxed text-(--app-text-primary)"
+              className="quran-arabic mt-5 text-right leading-relaxed text-(--app-text-primary)"
+              style={{ fontSize: `${arabicFontSize}px` }}
               dir="rtl"
               lang="ar"
             >
               {verse.arabicIndopak}
             </p>
-            <p className="mt-4 text-base leading-7 text-(--app-text-secondary)">
-              {verse.transliterationEn}
-            </p>
-            <p className="mt-3 text-sm leading-7 text-(--app-text-muted)" lang="bn">
-              {verse.translationBnTaisirul}
-            </p>
+            {displayEnglishSpelling && (
+              <p
+                className="mt-4 leading-7 text-(--app-text-secondary)"
+                style={{ fontSize: `${englishFontSize}px` }}
+              >
+                {verse.transliterationEn}
+              </p>
+            )}
+            {displayBengaliMeaning && (
+              <p
+                className="mt-3 leading-7 text-(--app-text-muted)"
+                style={{ fontSize: `${bengaliFontSize}px` }}
+                lang="bn"
+              >
+                {verse.translationBnTaisirul}
+              </p>
+            )}
           </article>
         ))}
       </section>
