@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ProgressRouteImport } from './routes/progress'
+import { Route as MemorizeRouteImport } from './routes/memorize'
 import { Route as BookmarksRouteImport } from './routes/bookmarks'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SurahSurahIdRouteImport } from './routes/surah.$surahId'
@@ -17,6 +18,11 @@ import { Route as SurahSurahIdRouteImport } from './routes/surah.$surahId'
 const ProgressRoute = ProgressRouteImport.update({
   id: '/progress',
   path: '/progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemorizeRoute = MemorizeRouteImport.update({
+  id: '/memorize',
+  path: '/memorize',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BookmarksRoute = BookmarksRouteImport.update({
@@ -38,12 +44,14 @@ const SurahSurahIdRoute = SurahSurahIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bookmarks': typeof BookmarksRoute
+  '/memorize': typeof MemorizeRoute
   '/progress': typeof ProgressRoute
   '/surah/$surahId': typeof SurahSurahIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bookmarks': typeof BookmarksRoute
+  '/memorize': typeof MemorizeRoute
   '/progress': typeof ProgressRoute
   '/surah/$surahId': typeof SurahSurahIdRoute
 }
@@ -51,20 +59,28 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bookmarks': typeof BookmarksRoute
+  '/memorize': typeof MemorizeRoute
   '/progress': typeof ProgressRoute
   '/surah/$surahId': typeof SurahSurahIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/bookmarks' | '/progress' | '/surah/$surahId'
+  fullPaths: '/' | '/bookmarks' | '/memorize' | '/progress' | '/surah/$surahId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/bookmarks' | '/progress' | '/surah/$surahId'
-  id: '__root__' | '/' | '/bookmarks' | '/progress' | '/surah/$surahId'
+  to: '/' | '/bookmarks' | '/memorize' | '/progress' | '/surah/$surahId'
+  id:
+    | '__root__'
+    | '/'
+    | '/bookmarks'
+    | '/memorize'
+    | '/progress'
+    | '/surah/$surahId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BookmarksRoute: typeof BookmarksRoute
+  MemorizeRoute: typeof MemorizeRoute
   ProgressRoute: typeof ProgressRoute
   SurahSurahIdRoute: typeof SurahSurahIdRoute
 }
@@ -76,6 +92,13 @@ declare module '@tanstack/react-router' {
       path: '/progress'
       fullPath: '/progress'
       preLoaderRoute: typeof ProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memorize': {
+      id: '/memorize'
+      path: '/memorize'
+      fullPath: '/memorize'
+      preLoaderRoute: typeof MemorizeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bookmarks': {
@@ -105,6 +128,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BookmarksRoute: BookmarksRoute,
+  MemorizeRoute: MemorizeRoute,
   ProgressRoute: ProgressRoute,
   SurahSurahIdRoute: SurahSurahIdRoute,
 }
