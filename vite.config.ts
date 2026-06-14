@@ -11,6 +11,7 @@ import { generatePwa } from './scripts/generate-pwa'
 
 const prerenderPages = [
   { path: '/' },
+  { path: '/bookmarks' },
   { path: '/progress' },
   ...Array.from({ length: 114 }, (_, index) => ({
     path: `/surah/${index + 1}`,
