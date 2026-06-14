@@ -137,9 +137,13 @@ The root `package.json` defines:
 
 Default verification rule:
 
-- For normal code changes, run `npm run lint` only.
+- Do NOT run lint checking on every code change. Only run it on major code changes, not simple code changes (for major changes, run `npm.cmd run lint` only).
 - Do not run build, format, check, preview, or dev server commands unless the
   user explicitly asks.
+
+When running commands internally on Windows:
+
+- Execute commands via `cmd` (or use `.cmd` extensions, e.g. `npm.cmd run lint` instead of `npm run lint`) to avoid PowerShell execution policy blocks.
 
 When providing shell commands to the user, use standard npm/npx forms:
 
