@@ -1,5 +1,11 @@
 import { useEffect, Suspense } from 'react'
-import { Link, createFileRoute, notFound, defer, Await } from '@tanstack/react-router'
+import {
+  Link,
+  createFileRoute,
+  notFound,
+  defer,
+  Await,
+} from '@tanstack/react-router'
 import { ArrowLeft, Bookmark } from 'lucide-react'
 
 import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
@@ -68,8 +74,7 @@ export const Route = createFileRoute('/surah/$surahId')({
       ],
       scripts: [
         {
-          children:
-            `(function(){try{var s=JSON.parse(localStorage.getItem("quran0-settings")).state;document.documentElement.style.setProperty("--arabic-fs",s.arabicFontSize+"px");document.documentElement.style.setProperty("--english-fs",s.englishFontSize+"px");document.documentElement.style.setProperty("--bengali-fs",s.bengaliFontSize+"px");document.documentElement.style.setProperty("--show-en",s.displayEnglishSpelling?"block":"none");document.documentElement.style.setProperty("--show-bn",s.displayBengaliMeaning?"block":"none")}catch(e){}}());(function(){try{var b=JSON.parse(localStorage.getItem("quran0-bookmarks")||'null');var ids=b&&b.state?b.state.bookmarkIds:[];var f=ids.indexOf(${surahId})!==-1;document.documentElement.style.setProperty("--surah-bm-fill",f?"var(--app-accent)":"transparent");document.documentElement.style.setProperty("--surah-bm-color",f?"var(--app-accent)":"var(--app-text-tertiary)")}catch(e){}})()`,
+          children: `(function(){try{var s=JSON.parse(localStorage.getItem("quran0-settings")).state;document.documentElement.style.setProperty("--arabic-fs",s.arabicFontSize+"px");document.documentElement.style.setProperty("--english-fs",s.englishFontSize+"px");document.documentElement.style.setProperty("--bengali-fs",s.bengaliFontSize+"px");document.documentElement.style.setProperty("--show-en",s.displayEnglishSpelling?"block":"none");document.documentElement.style.setProperty("--show-bn",s.displayBengaliMeaning?"block":"none")}catch(e){}}());(function(){try{var b=JSON.parse(localStorage.getItem("quran0-bookmarks")||'null');var ids=b&&b.state?b.state.bookmarkIds:[];var f=ids.indexOf(${surahId})!==-1;document.documentElement.style.setProperty("--surah-bm-fill",f?"var(--app-accent)":"transparent");document.documentElement.style.setProperty("--surah-bm-color",f?"var(--app-accent)":"var(--app-text-tertiary)")}catch(e){}})()`,
         },
       ],
     }
