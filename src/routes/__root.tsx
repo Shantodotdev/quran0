@@ -5,6 +5,7 @@ import { useEffect } from 'react'
 import { BottomNav } from '#/components/bottom-nav'
 import { Navbar } from '#/components/navbar'
 import { PwaInstallPrompt } from '#/components/pwa-install-prompt'
+import { AudioPlayer } from '#/components/audio-player'
 import { useThemeStore } from '#/stores/theme'
 import appCss from '../styles.css?url'
 
@@ -94,6 +95,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
             {children}
           </main>
+          <AudioPlayer />
           <PwaInstallPrompt />
           <BottomNav />
         </div>
