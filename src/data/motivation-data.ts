@@ -34,7 +34,7 @@ export interface FeelingDetail {
 
 /**
  * Curated list of emotional states and corresponding Quranic verse references.
- * Contains 44 comfort and guidance verses selected from verified traditional sources.
+ * Contains 81 comfort and guidance verses selected from verified traditional sources.
  */
 export const FEELINGS_DATA: FeelingDetail[] = [
   {
@@ -75,6 +75,26 @@ export const FEELINGS_DATA: FeelingDetail[] = [
         surahId: 2,
         verseNumber: 156,
         contextEn: 'When you experience a sudden loss or tragedy'
+      },
+      {
+        surahId: 57,
+        verseNumber: 23,
+        contextEn: 'When you feel regret over what has slipped past you'
+      },
+      {
+        surahId: 15,
+        verseNumber: 97,
+        contextEn: 'When your heart is tight and constrained by what people say'
+      },
+      {
+        surahId: 76,
+        verseNumber: 24,
+        contextEn: 'When you need patience for the long journey of grief'
+      },
+      {
+        surahId: 11,
+        verseNumber: 115,
+        contextEn: 'When you wonder if your patient endurance has value'
       }
     ]
   },
@@ -116,6 +136,26 @@ export const FEELINGS_DATA: FeelingDetail[] = [
         surahId: 3,
         verseNumber: 173,
         contextEn: 'When you feel overwhelmed by threats or circumstances'
+      },
+      {
+        surahId: 2,
+        verseNumber: 153,
+        contextEn: 'When you need to anchor your mind in patience and prayer'
+      },
+      {
+        surahId: 2,
+        verseNumber: 216,
+        contextEn: 'When things do not go as planned and you worry'
+      },
+      {
+        surahId: 2,
+        verseNumber: 186,
+        contextEn: 'When you need reassurance that your silent prayers are heard'
+      },
+      {
+        surahId: 8,
+        verseNumber: 30,
+        contextEn: 'When you worry about the plots or plans of others'
       }
     ]
   },
@@ -152,6 +192,31 @@ export const FEELINGS_DATA: FeelingDetail[] = [
         surahId: 33,
         verseNumber: 3,
         contextEn: 'When you need courage to do the right thing'
+      },
+      {
+        surahId: 9,
+        verseNumber: 40,
+        contextEn: 'When you are facing immediate danger'
+      },
+      {
+        surahId: 2,
+        verseNumber: 250,
+        contextEn: 'When you feel afraid of being overpowered by challenges'
+      },
+      {
+        surahId: 3,
+        verseNumber: 175,
+        contextEn: 'When people try to manipulate you using fear'
+      },
+      {
+        surahId: 16,
+        verseNumber: 112,
+        contextEn: 'When seeking safety in a secure and tranquil space'
+      },
+      {
+        surahId: 48,
+        verseNumber: 4,
+        contextEn: 'When you need calmness and tranquility poured into your heart'
       }
     ]
   },
@@ -188,6 +253,31 @@ export const FEELINGS_DATA: FeelingDetail[] = [
         surahId: 25,
         verseNumber: 63,
         contextEn: 'When you want to maintain peace and dignity'
+      },
+      {
+        surahId: 42,
+        verseNumber: 43,
+        contextEn: 'When you seek the resolve to forgive someone who wronged you'
+      },
+      {
+        surahId: 24,
+        verseNumber: 22,
+        contextEn: 'When you struggle to forgive those close to you'
+      },
+      {
+        surahId: 7,
+        verseNumber: 200,
+        contextEn: 'When you feel Satan whispers driving you to rage'
+      },
+      {
+        surahId: 41,
+        verseNumber: 34,
+        contextEn: 'When you want to repel anger with kindness'
+      },
+      {
+        surahId: 64,
+        verseNumber: 14,
+        contextEn: 'When dealing with conflicts within your own family'
       }
     ]
   },
@@ -224,6 +314,31 @@ export const FEELINGS_DATA: FeelingDetail[] = [
         surahId: 2,
         verseNumber: 186,
         contextEn: 'When you feel too weak to pray and need Allah to hear you'
+      },
+      {
+        surahId: 54,
+        verseNumber: 10,
+        contextEn: 'When you feel utterly defeated and call out for help'
+      },
+      {
+        surahId: 3,
+        verseNumber: 160,
+        contextEn: 'When you feel you have no support and need strength'
+      },
+      {
+        surahId: 19,
+        verseNumber: 4,
+        contextEn: 'When your body has grown feeble with age or exhaustion'
+      },
+      {
+        surahId: 3,
+        verseNumber: 146,
+        contextEn: 'When you are exhausted in the struggle and need steadfastness'
+      },
+      {
+        surahId: 40,
+        verseNumber: 60,
+        contextEn: 'When you are overwhelmed and need a direct invitation to pray'
       }
     ]
   },
@@ -260,6 +375,31 @@ export const FEELINGS_DATA: FeelingDetail[] = [
         surahId: 9,
         verseNumber: 129,
         contextEn: 'When people walk away and you are left on your own'
+      },
+      {
+        surahId: 20,
+        verseNumber: 46,
+        contextEn: 'When you need to remember you are never truly alone'
+      },
+      {
+        surahId: 9,
+        verseNumber: 40,
+        contextEn: 'When you are isolated and need to feel His companionship'
+      },
+      {
+        surahId: 10,
+        verseNumber: 107,
+        contextEn: 'When you feel only Allah can remove your distress'
+      },
+      {
+        surahId: 6,
+        verseNumber: 17,
+        contextEn: 'When you feel abandoned to your difficulties'
+      },
+      {
+        surahId: 11,
+        verseNumber: 88,
+        contextEn: 'When you feel you have no one but Allah to rely upon'
       }
     ]
   },
@@ -301,6 +441,26 @@ export const FEELINGS_DATA: FeelingDetail[] = [
         surahId: 2,
         verseNumber: 222,
         contextEn: "When you seek Allah's love through repentance"
+      },
+      {
+        surahId: 25,
+        verseNumber: 70,
+        contextEn: 'When you hope your bad deeds can be turned into good deeds'
+      },
+      {
+        surahId: 6,
+        verseNumber: 54,
+        contextEn: 'When you need to hear about His vast mercy for mistakes'
+      },
+      {
+        surahId: 4,
+        verseNumber: 110,
+        contextEn: 'When you want reassurance that seeking forgiveness is always answered'
+      },
+      {
+        surahId: 42,
+        verseNumber: 25,
+        contextEn: 'When you need to remember He accepts repentance and pardons misdeeds'
       }
     ]
   },
@@ -342,6 +502,26 @@ export const FEELINGS_DATA: FeelingDetail[] = [
         surahId: 16,
         verseNumber: 18,
         contextEn: 'When you try to count your blessings'
+      },
+      {
+        surahId: 55,
+        verseNumber: 13,
+        contextEn: 'When you want to reflect on His daily favors'
+      },
+      {
+        surahId: 39,
+        verseNumber: 66,
+        contextEn: 'When you want to dedicate your worship to gratitude'
+      },
+      {
+        surahId: 2,
+        verseNumber: 172,
+        contextEn: 'When you thank Him for pure sustenance'
+      },
+      {
+        surahId: 93,
+        verseNumber: 11,
+        contextEn: 'When you want to speak of and share the blessings of your Lord'
       }
     ]
   }
