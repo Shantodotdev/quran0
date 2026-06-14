@@ -1,9 +1,10 @@
 import { useEffect } from 'react'
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Bookmark } from 'lucide-react'
 
 import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
 import { useSettingsStore } from '#/stores/settings'
+import { useBookmarksStore } from '#/stores/bookmarks'
 import { ReadingProgressBar } from '#/components/reading-progress-bar'
 
 /**
@@ -41,6 +42,8 @@ export const Route = createFileRoute('/surah/$surahId')({
       }
     }
 
+    const surahId = surah.id
+
     return {
       meta: [
         {
@@ -54,7 +57,7 @@ export const Route = createFileRoute('/surah/$surahId')({
       scripts: [
         {
           children:
-            '(function(){try{var s=JSON.parse(localStorage.getItem("quran0-settings")).state;document.documentElement.style.setProperty("--arabic-fs",s.arabicFontSize+"px");document.documentElement.style.setProperty("--english-fs",s.englishFontSize+"px");document.documentElement.style.setProperty("--bengali-fs",s.bengaliFontSize+"px");document.documentElement.style.setProperty("--show-en",s.displayEnglishSpelling?"block":"none");document.documentElement.style.setProperty("--show-bn",s.displayBengaliMeaning?"block":"none")}catch(e){}}())',
+            `(function(){try{var s=JSON.parse(localStorage.getItem("quran0-settings")).state;document.documentElement.style.setProperty("--arabic-fs",s.arabicFontSize+"px");document.documentElement.style.setProperty("--english-fs",s.englishFontSize+"px");document.documentElement.style.setProperty("--bengali-fs",s.bengaliFontSize+"px");document.documentElement.style.setProperty("--show-en",s.displayEnglishSpelling?"block":"none");document.documentElement.style.setProperty("--show-bn",s.displayBengaliMeaning?"block":"none")}catch(e){}}());(function(){try{var b=JSON.parse(localStorage.getItem("quran0-bookmarks")||'null');var ids=b&&b.state?b.state.bookmarkIds:[];var f=ids.indexOf(${surahId})!==-1;document.documentElement.style.setProperty("--surah-bm-fill",f?"var(--app-accent)":"transparent");document.documentElement.style.setProperty("--surah-bm-color",f?"var(--app-accent)":"var(--app-text-tertiary)")}catch(e){}})()`,
         },
       ],
     }
@@ -101,6 +104,23 @@ function SurahPage() {
     (s) => s.displayEnglishSpelling,
   )
   const displayBengaliMeaning = useSettingsStore((s) => s.displayBengaliMeaning)
+  const isBookmarked = useBookmarksStore((s) => s.isBookmarked(surah.id))
+  const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark)
+
+  // Sync bookmark fill/color CSS custom properties on state change.
+  // The inline <script> in head sets these before first paint via
+  // localStorage so there's no flash of the wrong icon state.
+  useEffect(() => {
+    const root = document.documentElement
+    root.style.setProperty(
+      '--surah-bm-fill',
+      isBookmarked ? 'var(--app-accent)' : 'transparent',
+    )
+    root.style.setProperty(
+      '--surah-bm-color',
+      isBookmarked ? 'var(--app-accent)' : 'var(--app-text-tertiary)',
+    )
+  }, [isBookmarked])
 
   // Sync font sizes and display toggles to CSS custom properties.
   // The inline <script> in head sets these before first paint to avoid a
@@ -157,13 +177,29 @@ function SurahPage() {
               {surah.translatedNameBn}
             </p>
           </div>
-          {/* Arabic surah name — right-aligned, RTL */}
-          <p
-            className="quran-arabic shrink-0 text-right text-3xl leading-tight text-(--app-text-primary)"
-            dir="rtl"
-          >
-            {surah.nameArabic}
-          </p>
+          {/* Arabic surah name + bookmark button — right-aligned, RTL */}
+          <div className="flex shrink-0 flex-col items-center gap-3">
+            <p
+              className="quran-arabic text-right text-3xl leading-tight text-(--app-text-primary)"
+              dir="rtl"
+            >
+              {surah.nameArabic}
+            </p>
+            <button
+              type="button"
+              onClick={() => toggleBookmark(surah.id)}
+              className="flex size-9 items-center justify-center rounded-lg transition-colors hover:bg-(--app-hover-bg)"
+              aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark surah'}
+            >
+              <Bookmark
+                className="size-5"
+                style={{
+                  fill: 'var(--surah-bm-fill, transparent)',
+                  color: 'var(--surah-bm-color, var(--app-text-tertiary))',
+                }}
+              />
+            </button>
+          </div>
         </div>
       </header>
 
