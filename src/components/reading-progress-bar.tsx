@@ -14,11 +14,23 @@ export function ReadingProgressBar() {
       const docHeight = document.documentElement.scrollHeight
       const winHeight = window.innerHeight
       const maxScroll = docHeight - winHeight
-      setProgress(maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 1)
+      setProgress(maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 0)
     }
+
     window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onScroll, { passive: true })
+
+    // Observe size changes of the document element (e.g., when verses load/render or font sizes change)
+    const observer = new ResizeObserver(onScroll)
+    observer.observe(document.documentElement)
+
     onScroll()
-    return () => window.removeEventListener('scroll', onScroll)
+
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onScroll)
+      observer.disconnect()
+    }
   }, [])
 
   return (
