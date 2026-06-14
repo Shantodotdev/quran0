@@ -152,3 +152,38 @@ body {
     transform: translateY(-4px) scale(0.96);
   }
 }
+
+/* Swipe transitions and animations */
+.will-change-transform {
+  will-change: transform, opacity;
+}
+
+@keyframes slide-in-from-right {
+  from {
+    transform: translate3d(100%, 0, 0);
+    opacity: 0.8;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-left {
+  from {
+    transform: translate3d(-100%, 0, 0);
+    opacity: 0.8;
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in-from-right {
+  animation: slide-in-from-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in-from-left {
+  animation: slide-in-from-left 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

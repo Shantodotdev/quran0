@@ -1,12 +1,13 @@
-import { useEffect, Suspense } from 'react'
+import { useEffect, Suspense, useRef, useState } from 'react'
 import {
   Link,
   createFileRoute,
   notFound,
   defer,
   Await,
+  useNavigate,
 } from '@tanstack/react-router'
-import { ArrowLeft, Bookmark } from 'lucide-react'
+import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
 import { useSettingsStore } from '#/stores/settings'
@@ -124,6 +125,155 @@ function SurahPage() {
   const isBookmarked = useBookmarksStore((s) => s.isBookmarked(surah.id))
   const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark)
 
+  const navigate = useNavigate()
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Track animation and navigation state
+  const [currentSurahId, setCurrentSurahId] = useState(surah.id)
+  const [entryClass, setEntryClass] = useState('animate-slide-in-from-right')
+  const [shouldRenderVerses, setShouldRenderVerses] = useState(false)
+
+  // Derive animation direction synchronously during render to avoid flashes
+  if (surah.id !== currentSurahId) {
+    const dir = surah.id > currentSurahId ? 'right' : 'left'
+    setEntryClass(`animate-slide-in-from-${dir}`)
+    setCurrentSurahId(surah.id)
+  }
+
+  // Clear animation class once transition completes
+  useEffect(() => {
+    if (entryClass) {
+      const timer = setTimeout(() => {
+        setEntryClass('')
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+  }, [entryClass])
+
+  // Delay rendering the verses list until the slide animation completes
+  useEffect(() => {
+    setShouldRenderVerses(false)
+    const timer = setTimeout(() => {
+      setShouldRenderVerses(true)
+    }, 250) // 250ms matches the snappy transition duration
+    return () => clearTimeout(timer)
+  }, [surah.id])
+
+  // Track active swipe gestures
+  const swipeStateRef = useRef<{
+    startX: number
+    startY: number
+    isSwiping: boolean
+    isScrolling: boolean
+    diffX: number
+  }>({
+    startX: 0,
+    startY: 0,
+    isSwiping: false,
+    isScrolling: false,
+    diffX: 0,
+  })
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0]
+    swipeStateRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      isSwiping: false,
+      isScrolling: false,
+      diffX: 0,
+    }
+
+    if (containerRef.current) {
+      containerRef.current.style.transition = 'none'
+    }
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const state = swipeStateRef.current
+    if (state.isScrolling) return
+
+    const touch = e.touches[0]
+    const diffX = touch.clientX - state.startX
+    const diffY = touch.clientY - state.startY
+
+    if (!state.isSwiping) {
+      const absDiffX = Math.abs(diffX)
+      const absDiffY = Math.abs(diffY)
+
+      if (absDiffX > 10 && absDiffX > absDiffY) {
+        state.isSwiping = true
+      } else if (absDiffY > 10) {
+        state.isScrolling = true
+        return
+      }
+    }
+
+    if (state.isSwiping) {
+      state.diffX = diffX
+
+      // Add boundary resistance
+      let adjustedDiffX = diffX
+      if (surah.id === 1 && diffX > 0) {
+        adjustedDiffX = diffX * 0.35
+      } else if (surah.id === 114 && diffX < 0) {
+        adjustedDiffX = diffX * 0.35
+      }
+
+      if (containerRef.current) {
+        containerRef.current.style.transform = `translate3d(${adjustedDiffX}px, 0, 0)`
+      }
+    }
+  }
+
+  const handleTouchEnd = () => {
+    const state = swipeStateRef.current
+    if (!state.isSwiping) return
+
+    const diffX = state.diffX
+    const threshold = 100 // swipe threshold in pixels
+
+    if (Math.abs(diffX) > threshold) {
+      if (diffX < 0 && surah.id < 114) {
+        const nextId = surah.id + 1
+        if (containerRef.current) {
+          containerRef.current.style.transition =
+            'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s'
+          containerRef.current.style.transform = `translate3d(-100vw, 0, 0)`
+          containerRef.current.style.opacity = '0'
+        }
+        setTimeout(() => {
+          navigate({
+            to: '/surah/$surahId',
+            params: { surahId: String(nextId) },
+          })
+        }, 180)
+        return
+      } else if (diffX > 0 && surah.id > 1) {
+        const prevId = surah.id - 1
+        if (containerRef.current) {
+          containerRef.current.style.transition =
+            'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s'
+          containerRef.current.style.transform = `translate3d(100vw, 0, 0)`
+          containerRef.current.style.opacity = '0'
+        }
+        setTimeout(() => {
+          navigate({
+            to: '/surah/$surahId',
+            params: { surahId: String(prevId) },
+          })
+        }, 180)
+        return
+      }
+    }
+
+    if (containerRef.current) {
+      containerRef.current.style.transition =
+        'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+      containerRef.current.style.transform = 'translate3d(0, 0, 0)'
+    }
+  }
+
   // Sync bookmark fill/color CSS custom properties on state change.
   // The inline <script> in head sets these before first paint via
   // localStorage so there's no flash of the wrong icon state.
@@ -165,67 +315,105 @@ function SurahPage() {
   ])
 
   return (
-    <>
+    <div className="relative w-full overflow-x-hidden">
       <ReadingProgressBar />
-      {/* Surah header: back link, metadata, names */}
-      <header className="rounded-lg border border-(--app-border) bg-(--app-surface) p-4 shadow-sm">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-sm text-(--app-accent) transition-colors"
-        >
-          <ArrowLeft className="size-4" />
-          <span>All Surahs</span>
-        </Link>
-        <div className="mt-3 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-xs font-medium text-(--app-text-tertiary) uppercase tracking-wider">
-              Surah {surah.id} · {surah.versesCount} Ayahs
-            </p>
-            <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-(--app-text-primary)">
-              {surah.nameSimple}
-            </h1>
-            <p
-              className="mt-0.5 text-base text-(--app-text-secondary)"
-              lang="bn"
-            >
-              {surah.banglaName}
-            </p>
-            <p className="mt-0.5 text-sm text-(--app-text-tertiary)" lang="bn">
-              {surah.translatedNameBn}
-            </p>
-          </div>
-          {/* Arabic surah name + bookmark button — right-aligned, RTL */}
-          <div className="flex shrink-0 flex-col items-center gap-3">
-            <p
-              className="quran-arabic text-right text-3xl leading-tight text-(--app-text-primary)"
-              dir="rtl"
-            >
-              {surah.nameArabic}
-            </p>
-            <button
-              type="button"
-              onClick={() => toggleBookmark(surah.id)}
-              className="flex size-9 items-center justify-center rounded-lg transition-colors hover:bg-(--app-hover-bg)"
-              aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark surah'}
-            >
-              <Bookmark
-                className="size-5"
-                style={{
-                  fill: 'var(--surah-bm-fill, transparent)',
-                  color: 'var(--surah-bm-color, var(--app-text-tertiary))',
-                }}
-              />
-            </button>
-          </div>
-        </div>
-      </header>
 
-      {/* Verse list with Suspense / Await deferred loading */}
-      <Suspense fallback={<VerseListLoader />}>
-        <Await promise={versesPromise}>
-          {(verses) => <VerseList verses={verses} />}
-        </Await>
-      </Suspense>
-    </>
+      <div
+        key={surah.id}
+        ref={containerRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        className={`w-full will-change-transform ${entryClass}`}
+      >
+        {/* Surah header: back link, metadata, names */}
+        <header className="rounded-lg border border-(--app-border) bg-(--app-surface) p-4 shadow-sm">
+          {/* Top navigation row */}
+          <div className="flex items-center justify-between border-b border-(--app-border) pb-3 mb-4">
+            {surah.id > 1 ? (
+              <Link
+                to="/surah/$surahId"
+                params={{ surahId: String(surah.id - 1) }}
+                className="inline-flex items-center gap-1 text-sm text-(--app-text-secondary) hover:text-(--app-accent) transition-colors font-medium"
+              >
+                <ChevronLeft className="size-4" />
+                <span>{getSurahById(surah.id - 1)?.nameSimple}</span>
+              </Link>
+            ) : (
+              <div className="w-10" />
+            )}
+
+            {surah.id < 114 ? (
+              <Link
+                to="/surah/$surahId"
+                params={{ surahId: String(surah.id + 1) }}
+                className="inline-flex items-center gap-1 text-sm text-(--app-text-secondary) hover:text-(--app-accent) transition-colors font-medium"
+              >
+                <span>{getSurahById(surah.id + 1)?.nameSimple}</span>
+                <ChevronRight className="size-4" />
+              </Link>
+            ) : (
+              <div className="w-10" />
+            )}
+          </div>
+          <div className="mt-3 flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-medium text-(--app-text-tertiary) uppercase tracking-wider">
+                Surah {surah.id} · {surah.versesCount} Ayahs
+              </p>
+              <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-(--app-text-primary)">
+                {surah.nameSimple}
+              </h1>
+              <p
+                className="mt-0.5 text-base text-(--app-text-secondary)"
+                lang="bn"
+              >
+                {surah.banglaName}
+              </p>
+              <p
+                className="mt-0.5 text-sm text-(--app-text-tertiary)"
+                lang="bn"
+              >
+                {surah.translatedNameBn}
+              </p>
+            </div>
+            {/* Arabic surah name + bookmark button — right-aligned, RTL */}
+            <div className="flex shrink-0 flex-col items-center gap-3">
+              <p
+                className="quran-arabic text-right text-3xl leading-tight text-(--app-text-primary)"
+                dir="rtl"
+              >
+                {surah.nameArabic}
+              </p>
+              <button
+                type="button"
+                onClick={() => toggleBookmark(surah.id)}
+                className="flex size-9 items-center justify-center rounded-lg transition-colors hover:bg-(--app-hover-bg)"
+                aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark surah'}
+              >
+                <Bookmark
+                  className="size-5"
+                  style={{
+                    fill: 'var(--surah-bm-fill, transparent)',
+                    color: 'var(--surah-bm-color, var(--app-text-tertiary))',
+                  }}
+                />
+              </button>
+            </div>
+          </div>
+        </header>
+
+        {/* Verse list with Suspense / Await deferred loading */}
+        {shouldRenderVerses ? (
+          <Suspense fallback={<VerseListLoader />}>
+            <Await promise={versesPromise}>
+              {(verses) => <VerseList verses={verses} />}
+            </Await>
+          </Suspense>
+        ) : (
+          <VerseListLoader />
+        )}
+      </div>
+    </div>
   )
 }
