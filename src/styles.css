@@ -187,3 +187,20 @@ body {
 .animate-slide-in-from-left {
   animation: slide-in-from-left 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes pulse-highlight {
+  0% {
+    background-color: var(--app-accent-soft);
+  }
+  30% {
+    background-color: var(--app-accent-soft);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.animate-highlight {
+  animation: pulse-highlight 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+

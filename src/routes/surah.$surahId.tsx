@@ -29,7 +29,22 @@ import { VerseList, VerseListLoader } from '#/components/verse-list'
  * paint. This prevents a flash where default font sizes or toggle states
  * render briefly before React hydrates.
  */
+/**
+ * Search parameter contract for Surah routes.
+ * Supports highlighting and scrolling to specific verses (e.g. from the Motivation page).
+ */
+type SurahSearch = {
+  /** Optional verse number parameter to highlight on page load */
+  verse?: number
+}
+
 export const Route = createFileRoute('/surah/$surahId')({
+  // Parse and validate the optional 'verse' query parameter
+  validateSearch: (search: Record<string, unknown>): SurahSearch => {
+    return {
+      verse: search.verse ? Number(search.verse) : undefined,
+    }
+  },
   loader: async ({ params }) => {
     const surahId = parseSurahId(params.surahId)
     const surah = getSurahById(surahId)
@@ -116,6 +131,7 @@ function parseSurahId(value: string) {
  */
 function SurahPage() {
   const { surah, versesPromise } = Route.useLoaderData()
+  const { verse } = Route.useSearch()
   const arabicFontSize = useSettingsStore((s) => s.arabicFontSize)
   const englishFontSize = useSettingsStore((s) => s.englishFontSize)
   const bengaliFontSize = useSettingsStore((s) => s.bengaliFontSize)
@@ -307,7 +323,7 @@ function SurahPage() {
         {shouldRenderVerses ? (
           <Suspense fallback={<VerseListLoader />}>
             <Await promise={versesPromise}>
-              {(verses) => <VerseList verses={verses} />}
+              {(verses) => <VerseList verses={verses} highlightVerse={verse} />}
             </Await>
           </Suspense>
         ) : (
