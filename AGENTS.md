@@ -48,7 +48,7 @@ Current product direction:
 3. Do not run `npm run build`, `npm run format`, `npm run dev`, or production preview commands unless the user explicitly asks.
 4. Do not start the dev server unless the user explicitly asks.
 5. Do not run git commands unless the user explicitly asks.
-6. Do not edit `src/routeTree.gen.ts` manually. Generate routes with the TanStack Router tooling when needed.
+6. Do not edit `src/routeTree.gen.ts` manually. Agents must never run the route generation command (`npm run generate-routes`). It will be generated automatically and no need to think about it.
 7. Do not install packages automatically for small additions. Write the code, then tell the user which package is needed and the install command.
 8. Do not assume Quran API shape, translation source, tafsir source, audio source, or offline strategy without checking the real API/docs first.
 
