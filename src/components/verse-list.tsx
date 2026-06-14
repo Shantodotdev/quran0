@@ -24,19 +24,28 @@ export function VerseListLoader() {
 export function VerseList({
   verses,
   highlightVerse,
+  activePlayingVerse,
 }: {
   verses: QuranVerse[]
   highlightVerse?: number
+  activePlayingVerse?: string | null
 }) {
+  const activePlayingVerseNum = activePlayingVerse
+    ? Number(activePlayingVerse.split(':')[1])
+    : undefined
+
   const [displayLimit, setDisplayLimit] = useState(() => {
     // During SSR or initial load, render all verses.
     if (typeof window === 'undefined' || isInitialLoad) {
       return verses.length
     }
-    // If a verse is highlighted, override progressive rendering limit to render 
-    // it immediately so it exists in the DOM for scrollIntoView.
+    // If a verse is highlighted or active in audio, override progressive rendering limit
+    // to render it immediately so it exists in the DOM for scrollIntoView.
     if (highlightVerse) {
       return Math.max(20, highlightVerse + 5)
+    }
+    if (activePlayingVerseNum) {
+      return Math.max(20, activePlayingVerseNum + 5)
     }
     return 20
   })
@@ -44,6 +53,13 @@ export function VerseList({
   useEffect(() => {
     isInitialLoad = false
   }, [])
+
+  // Auto-expand progressive loading limit if the playing audio advances beyond current limits
+  useEffect(() => {
+    if (activePlayingVerseNum && activePlayingVerseNum > displayLimit) {
+      setDisplayLimit((prev) => Math.max(prev, activePlayingVerseNum + 5))
+    }
+  }, [activePlayingVerseNum, displayLimit])
 
   useEffect(() => {
     if (displayLimit >= verses.length) return
@@ -62,11 +78,14 @@ export function VerseList({
       {visibleVerses.map((verse) => {
         const verseNum = Number(verse.verseKey.split(':')[1])
         const isHighlighted = highlightVerse === verseNum
+        const isPlayingHighlighted = activePlayingVerse === verse.verseKey
+
         return (
           <VerseCard
             key={verse.verseKey}
             verse={verse}
             isHighlighted={isHighlighted}
+            isPlayingHighlighted={isPlayingHighlighted}
           />
         )
       })}
@@ -88,30 +107,27 @@ export function VerseList({
 function VerseCard({
   verse,
   isHighlighted,
+  isPlayingHighlighted,
 }: {
   verse: QuranVerse
   isHighlighted?: boolean
+  isPlayingHighlighted?: boolean
 }) {
   const cardRef = useRef<HTMLDivElement>(null)
 
+  // Scroll handler for search highlight (run on mount/trigger)
   useEffect(() => {
     if (isHighlighted && cardRef.current) {
-      // Helper function to smooth scroll the verse card to the center of the viewport
       const scroll = () => {
         cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
 
-      // Multi-stage timers prevent router scroll restoration and async elements 
-      // from overriding or cancelling our custom scroll position.
       const timers = [
         setTimeout(scroll, 100),
         setTimeout(scroll, 400),
-        setTimeout(scroll, 800), // Catch-all backup for slow devices
+        setTimeout(scroll, 800),
       ]
 
-      // Custom font files (Indo-Pak script font) load asynchronously and cause 
-      // significant layout/height shifts. Listening to 'fonts.ready' ensures 
-      // we scroll only after the final page heights have resolved.
       if (typeof window !== 'undefined' && 'fonts' in document) {
         document.fonts.ready.then(() => {
           requestAnimationFrame(scroll)
@@ -124,13 +140,25 @@ function VerseCard({
     }
   }, [isHighlighted])
 
+  // Scroll handler for active recitation playing verse (runs when active state toggles to true)
+  useEffect(() => {
+    if (isPlayingHighlighted && cardRef.current) {
+      cardRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+      })
+    }
+  }, [isPlayingHighlighted])
+
   return (
     <article
       ref={cardRef}
-      className={`p-3 rounded-lg transition-all duration-300 ${
+      className={`p-3 rounded-lg transition-all duration-300 border-l-4 ${
         isHighlighted
-          ? 'animate-highlight bg-(--app-accent-soft)/40'
-          : ''
+          ? 'animate-highlight bg-(--app-accent-soft)/40 border-transparent'
+          : isPlayingHighlighted
+            ? 'bg-(--app-accent-soft)/15 border-(--app-accent) shadow-sm'
+            : 'border-transparent'
       }`}
     >
       {/* Verse key badge (surah:ayah) */}

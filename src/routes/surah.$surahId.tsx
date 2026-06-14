@@ -7,11 +7,12 @@ import {
   Await,
   useNavigate,
 } from '@tanstack/react-router'
-import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Bookmark, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react'
 
 import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
 import { useSettingsStore } from '#/stores/settings'
 import { useBookmarksStore } from '#/stores/bookmarks'
+import { useAudioStore } from '#/stores/audio'
 import { useHorizontalSwipe } from '#/hooks/use-horizontal-swipe'
 import { ReadingProgressBar } from '#/components/reading-progress-bar'
 import { VerseList, VerseListLoader } from '#/components/verse-list'
@@ -141,6 +142,16 @@ function SurahPage() {
   const displayBengaliMeaning = useSettingsStore((s) => s.displayBengaliMeaning)
   const isBookmarked = useBookmarksStore((s) => s.isBookmarked(surah.id))
   const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark)
+
+  const audioSurahId = useAudioStore((s) => s.currentSurahId)
+  const isPlaying = useAudioStore((s) => s.isPlaying)
+  const activeVerseKey = useAudioStore((s) => s.activeVerseKey)
+  const playSurah = useAudioStore((s) => s.playSurah)
+  const togglePlay = useAudioStore((s) => s.togglePlay)
+
+  const isCurrentSurah = audioSurahId === surah.id
+  const isCurrentlyPlaying = isCurrentSurah && isPlaying
+  const activePlayingVerse = isCurrentSurah ? activeVerseKey : null
 
   const navigate = useNavigate()
 
@@ -301,20 +312,48 @@ function SurahPage() {
               >
                 {surah.nameArabic}
               </p>
-              <button
-                type="button"
-                onClick={() => toggleBookmark(surah.id)}
-                className="flex size-9 items-center justify-center rounded-lg transition-colors hover:bg-(--app-hover-bg)"
-                aria-label={isBookmarked ? 'Remove bookmark' : 'Bookmark surah'}
-              >
-                <Bookmark
-                  className="size-5"
-                  style={{
-                    fill: 'var(--surah-bm-fill, transparent)',
-                    color: 'var(--surah-bm-color, var(--app-text-tertiary))',
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isCurrentSurah) {
+                      togglePlay()
+                    } else {
+                      playSurah(surah.id)
+                    }
                   }}
-                />
-              </button>
+                  className={`flex size-9 items-center justify-center rounded-lg border transition-colors ${
+                    isCurrentlyPlaying
+                      ? 'border-(--app-accent)/40 bg-(--app-accent-soft) text-(--app-accent)'
+                      : 'border-transparent text-(--app-text-tertiary) hover:bg-(--app-hover-bg) hover:text-(--app-text-primary)'
+                  }`}
+                  aria-label={
+                    isCurrentlyPlaying ? 'Pause recitation' : 'Play recitation'
+                  }
+                >
+                  {isCurrentlyPlaying ? (
+                    <Pause className="size-5 fill-current" />
+                  ) : (
+                    <Play className="size-5 fill-current translate-x-[0.5px]" />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => toggleBookmark(surah.id)}
+                  className="flex size-9 items-center justify-center rounded-lg transition-colors hover:bg-(--app-hover-bg)"
+                  aria-label={
+                    isBookmarked ? 'Remove bookmark' : 'Bookmark surah'
+                  }
+                >
+                  <Bookmark
+                    className="size-5"
+                    style={{
+                      fill: 'var(--surah-bm-fill, transparent)',
+                      color: 'var(--surah-bm-color, var(--app-text-tertiary))',
+                    }}
+                  />
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -323,7 +362,13 @@ function SurahPage() {
         {shouldRenderVerses ? (
           <Suspense fallback={<VerseListLoader />}>
             <Await promise={versesPromise}>
-              {(verses) => <VerseList verses={verses} highlightVerse={verse} />}
+              {(verses) => (
+                <VerseList
+                  verses={verses}
+                  highlightVerse={verse}
+                  activePlayingVerse={activePlayingVerse}
+                />
+              )}
             </Await>
           </Suspense>
         ) : (
