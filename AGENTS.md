@@ -24,20 +24,20 @@ Current product direction:
 
 ## Repository Structure
 
-| Path                    | Purpose                                                   |
-| ----------------------- | --------------------------------------------------------- |
-| `src/routes`            | TanStack Router file-based routes                         |
-| `src/routes/__root.tsx` | Root HTML shell, metadata, styles, scripts, devtools      |
-| `src/routes/index.tsx`  | Current home page starter screen                          |
-| `src/router.tsx`        | Router creation and TanStack Router registration          |
-| `src/routeTree.gen.ts`  | Generated route tree; do not edit manually                |
-| `src/styles.css`        | Global Tailwind import and base styles                    |
-| `public`                | Static images, icons, manifest, and robots metadata        |
-| `public/manifest.webmanifest` | Quran0 install metadata and PWA icons              |
-| `scripts/generate-pwa.ts` | Generates Workbox output during Nitro's build lifecycle  |
-| `src/components/pwa-install-prompt.tsx` | Install UI and service-worker registration |
-| `vite.config.ts`        | Vite, TanStack Start, React, Tailwind, and devtools setup |
-| `tsr.config.json`       | TanStack Router CLI config                                |
+| Path                                    | Purpose                                                   |
+| --------------------------------------- | --------------------------------------------------------- |
+| `src/routes`                            | TanStack Router file-based routes                         |
+| `src/routes/__root.tsx`                 | Root HTML shell, metadata, styles, scripts, devtools      |
+| `src/routes/index.tsx`                  | Current home page starter screen                          |
+| `src/router.tsx`                        | Router creation and TanStack Router registration          |
+| `src/routeTree.gen.ts`                  | Generated route tree; do not edit manually                |
+| `src/styles.css`                        | Global Tailwind import and base styles                    |
+| `public`                                | Static images, icons, manifest, and robots metadata       |
+| `public/manifest.webmanifest`           | Quran0 install metadata and PWA icons                     |
+| `scripts/generate-pwa.ts`               | Generates Workbox output during Nitro's build lifecycle   |
+| `src/components/pwa-install-prompt.tsx` | Install UI and service-worker registration                |
+| `vite.config.ts`                        | Vite, TanStack Start, React, Tailwind, and devtools setup |
+| `tsr.config.json`                       | TanStack Router CLI config                                |
 
 ---
 
