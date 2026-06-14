@@ -1,7 +1,8 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useMemo, useState } from 'react'
 
 import { getAllSurahs, getSurahsByLearningOrder } from '#/data/quran/quran-data'
+import { SurahRow } from '#/components/surah-row'
 
 export const Route = createFileRoute('/')({ component: Home })
 
@@ -49,24 +50,7 @@ function Home() {
 
       <div className="grid gap-2">
         {surahs.map((surah) => (
-          <Link
-            key={surah.id}
-            to="/surah/$surahId"
-            params={{ surahId: String(surah.id) }}
-            className="grid grid-cols-[auto_1fr] items-center gap-3 p-3"
-          >
-            <span className="flex h-10 w-10 items-center justify-center rounded-md bg-(--app-accent-soft) text-lg font-semibold text-(--app-accent)">
-              {surah.id}
-            </span>
-            <span className="min-w-0">
-              <span className="block truncate text-base font-semibold text-(--app-text-primary)">
-                {surah.nameSimple}
-              </span>
-              <span className="mt-0.5 block truncate text-sm text-(--app-text-tertiary)">
-                {surah.banglaName} | {surah.translatedNameBn}
-              </span>
-            </span>
-          </Link>
+          <SurahRow key={surah.id} surah={surah} />
         ))}
       </div>
     </>
