@@ -12,22 +12,8 @@ export function BottomNav() {
   const isMotivationActive = pathname.startsWith('/motivation')
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-(--app-border) bg-(--app-surface-raised) px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-(--app-border) bg-(--app-surface-raised) px-4 pb-[calc(env(safe-area-inset-bottom)+0.6rem)] pt-2.5 backdrop-blur">
       <div className="mx-auto grid max-w-2xl grid-cols-5 gap-2">
-        <Link
-          to="/"
-          className={getNavItemClassName(isQuranActive)}
-          aria-label="Quran Index"
-        >
-          <BookOpen className="h-5 w-5" aria-hidden="true" />
-        </Link>
-        <Link
-          to="/bookmarks"
-          className={getNavItemClassName(isBookmarksActive)}
-          aria-label="Bookmarks"
-        >
-          <Bookmark className="h-5 w-5" aria-hidden="true" />
-        </Link>
         <Link
           to="/progress"
           className={getNavItemClassName(isProgressActive)}
@@ -43,6 +29,20 @@ export function BottomNav() {
           <Brain className="h-5 w-5" aria-hidden="true" />
         </Link>
         <Link
+          to="/"
+          className={getNavItemClassName(isQuranActive)}
+          aria-label="Quran Index"
+        >
+          <BookOpen style={{ width: '28px', height: '28px' }} aria-hidden="true" />
+        </Link>
+        <Link
+          to="/bookmarks"
+          className={getNavItemClassName(isBookmarksActive)}
+          aria-label="Bookmarks"
+        >
+          <Bookmark className="h-5 w-5" aria-hidden="true" />
+        </Link>
+        <Link
           to="/motivation"
           className={getNavItemClassName(isMotivationActive)}
           aria-label="Motivation"
@@ -56,7 +56,7 @@ export function BottomNav() {
 
 function getNavItemClassName(isActive: boolean) {
   return [
-    'flex min-h-12 items-center justify-center rounded-lg transition-colors',
+    'flex min-h-10 items-center justify-center rounded-lg transition-colors',
     isActive
       ? 'bg-(--app-accent-bg) text-(--app-accent-text)'
       : 'text-(--app-text-muted)',
