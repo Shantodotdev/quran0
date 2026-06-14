@@ -1,11 +1,12 @@
-import { useEffect } from 'react'
-import { Link, createFileRoute, notFound } from '@tanstack/react-router'
+import { useEffect, Suspense } from 'react'
+import { Link, createFileRoute, notFound, defer, Await } from '@tanstack/react-router'
 import { ArrowLeft, Bookmark } from 'lucide-react'
 
 import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
 import { useSettingsStore } from '#/stores/settings'
 import { useBookmarksStore } from '#/stores/bookmarks'
 import { ReadingProgressBar } from '#/components/reading-progress-bar'
+import { VerseList, VerseListLoader } from '#/components/verse-list'
 
 /**
  * Route: /surah/$surahId
@@ -29,9 +30,20 @@ export const Route = createFileRoute('/surah/$surahId')({
       throw notFound()
     }
 
+    // Force a minimum loading delay of 250ms on the client to ensure the spinner
+    // spins for a deliberate duration, avoiding an irritating 10-30ms flicker on fast loads.
+    // Skip this during SSR/prerendering to avoid slowing down build times.
+    const isServer = typeof window === 'undefined'
+    const versesPromise = isServer
+      ? getVersesBySurah(surahId)
+      : Promise.all([
+          getVersesBySurah(surahId),
+          new Promise((resolve) => setTimeout(resolve, 250)),
+        ]).then(([verses]) => verses)
+
     return {
       surah,
-      verses: await getVersesBySurah(surahId),
+      versesPromise: defer(versesPromise),
     }
   },
   head: ({ loaderData }) => {
@@ -96,7 +108,7 @@ function parseSurahId(value: string) {
  * settings in the sidebar.
  */
 function SurahPage() {
-  const { surah, verses } = Route.useLoaderData()
+  const { surah, versesPromise } = Route.useLoaderData()
   const arabicFontSize = useSettingsStore((s) => s.arabicFontSize)
   const englishFontSize = useSettingsStore((s) => s.englishFontSize)
   const bengaliFontSize = useSettingsStore((s) => s.bengaliFontSize)
@@ -203,49 +215,12 @@ function SurahPage() {
         </div>
       </header>
 
-      {/* Verse list — each verse has Arabic, optional English, optional Bengali */}
-      <section className="grid gap-3">
-        {verses.map((verse) => (
-          <article key={verse.verseKey} className="p-3">
-            {/* Verse key badge (surah:ayah) */}
-            <div className="flex items-start justify-between gap-3">
-              <span className="rounded-md bg-(--app-surface-raised) px-2 py-1 text-sm font-semibold text-(--app-text-secondary)">
-                {verse.verseKey}
-              </span>
-            </div>
-            {/* Arabic — font size from CSS var (set by settings), fallback 26px */}
-            <p
-              className="quran-arabic mt-5 text-right leading-relaxed text-(--app-text-primary)"
-              style={{ fontSize: 'var(--arabic-fs, 26px)' }}
-              dir="rtl"
-              lang="ar"
-            >
-              {verse.arabicIndopak}
-            </p>
-            {/* English transliteration — hidden via CSS var when toggled off */}
-            <p
-              className="mt-4 leading-7 text-(--app-text-secondary)"
-              style={{
-                fontSize: 'var(--english-fs, 16px)',
-                display: 'var(--show-en, block)',
-              }}
-            >
-              {verse.transliterationEn}
-            </p>
-            {/* Bengali meaning — hidden via CSS var when toggled off */}
-            <p
-              className="mt-3 leading-7 text-(--app-text-muted)"
-              style={{
-                fontSize: 'var(--bengali-fs, 16px)',
-                display: 'var(--show-bn, block)',
-              }}
-              lang="bn"
-            >
-              {verse.translationBnTaisirul}
-            </p>
-          </article>
-        ))}
-      </section>
+      {/* Verse list with Suspense / Await deferred loading */}
+      <Suspense fallback={<VerseListLoader />}>
+        <Await promise={versesPromise}>
+          {(verses) => <VerseList verses={verses} />}
+        </Await>
+      </Suspense>
     </>
   )
 }
