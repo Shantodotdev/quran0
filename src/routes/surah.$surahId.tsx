@@ -1,4 +1,4 @@
-import { useEffect, Suspense, useRef, useState } from 'react'
+import { useEffect, Suspense, useState } from 'react'
 import {
   Link,
   createFileRoute,
@@ -12,6 +12,7 @@ import { Bookmark, ChevronLeft, ChevronRight } from 'lucide-react'
 import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
 import { useSettingsStore } from '#/stores/settings'
 import { useBookmarksStore } from '#/stores/bookmarks'
+import { useHorizontalSwipe } from '#/hooks/use-horizontal-swipe'
 import { ReadingProgressBar } from '#/components/reading-progress-bar'
 import { VerseList, VerseListLoader } from '#/components/verse-list'
 
@@ -126,7 +127,6 @@ function SurahPage() {
   const toggleBookmark = useBookmarksStore((s) => s.toggleBookmark)
 
   const navigate = useNavigate()
-  const containerRef = useRef<HTMLDivElement>(null)
 
   // Track animation and navigation state
   const [currentSurahId, setCurrentSurahId] = useState(surah.id)
@@ -159,120 +159,23 @@ function SurahPage() {
     return () => clearTimeout(timer)
   }, [surah.id])
 
-  // Track active swipe gestures
-  const swipeStateRef = useRef<{
-    startX: number
-    startY: number
-    isSwiping: boolean
-    isScrolling: boolean
-    diffX: number
-  }>({
-    startX: 0,
-    startY: 0,
-    isSwiping: false,
-    isScrolling: false,
-    diffX: 0,
+  // Set up swipe gesture handlers
+  const swipeProps = useHorizontalSwipe({
+    onSwipeLeft: () => {
+      const nextId = surah.id + 1
+      setTimeout(() => {
+        navigate({ to: '/surah/$surahId', params: { surahId: String(nextId) } })
+      }, 180)
+    },
+    onSwipeRight: () => {
+      const prevId = surah.id - 1
+      setTimeout(() => {
+        navigate({ to: '/surah/$surahId', params: { surahId: String(prevId) } })
+      }, 180)
+    },
+    resistanceRightBoundary: surah.id === 1,
+    resistanceLeftBoundary: surah.id === 114,
   })
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0]
-    swipeStateRef.current = {
-      startX: touch.clientX,
-      startY: touch.clientY,
-      isSwiping: false,
-      isScrolling: false,
-      diffX: 0,
-    }
-
-    if (containerRef.current) {
-      containerRef.current.style.transition = 'none'
-    }
-  }
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    const state = swipeStateRef.current
-    if (state.isScrolling) return
-
-    const touch = e.touches[0]
-    const diffX = touch.clientX - state.startX
-    const diffY = touch.clientY - state.startY
-
-    if (!state.isSwiping) {
-      const absDiffX = Math.abs(diffX)
-      const absDiffY = Math.abs(diffY)
-
-      if (absDiffX > 10 && absDiffX > absDiffY) {
-        state.isSwiping = true
-      } else if (absDiffY > 10) {
-        state.isScrolling = true
-        return
-      }
-    }
-
-    if (state.isSwiping) {
-      state.diffX = diffX
-
-      // Add boundary resistance
-      let adjustedDiffX = diffX
-      if (surah.id === 1 && diffX > 0) {
-        adjustedDiffX = diffX * 0.35
-      } else if (surah.id === 114 && diffX < 0) {
-        adjustedDiffX = diffX * 0.35
-      }
-
-      if (containerRef.current) {
-        containerRef.current.style.transform = `translate3d(${adjustedDiffX}px, 0, 0)`
-      }
-    }
-  }
-
-  const handleTouchEnd = () => {
-    const state = swipeStateRef.current
-    if (!state.isSwiping) return
-
-    const diffX = state.diffX
-    const threshold = 100 // swipe threshold in pixels
-
-    if (Math.abs(diffX) > threshold) {
-      if (diffX < 0 && surah.id < 114) {
-        const nextId = surah.id + 1
-        if (containerRef.current) {
-          containerRef.current.style.transition =
-            'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s'
-          containerRef.current.style.transform = `translate3d(-100vw, 0, 0)`
-          containerRef.current.style.opacity = '0'
-        }
-        setTimeout(() => {
-          navigate({
-            to: '/surah/$surahId',
-            params: { surahId: String(nextId) },
-          })
-        }, 180)
-        return
-      } else if (diffX > 0 && surah.id > 1) {
-        const prevId = surah.id - 1
-        if (containerRef.current) {
-          containerRef.current.style.transition =
-            'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s'
-          containerRef.current.style.transform = `translate3d(100vw, 0, 0)`
-          containerRef.current.style.opacity = '0'
-        }
-        setTimeout(() => {
-          navigate({
-            to: '/surah/$surahId',
-            params: { surahId: String(prevId) },
-          })
-        }, 180)
-        return
-      }
-    }
-
-    if (containerRef.current) {
-      containerRef.current.style.transition =
-        'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
-      containerRef.current.style.transform = 'translate3d(0, 0, 0)'
-    }
-  }
 
   // Sync bookmark fill/color CSS custom properties on state change.
   // The inline <script> in head sets these before first paint via
@@ -320,11 +223,8 @@ function SurahPage() {
 
       <div
         key={surah.id}
-        ref={containerRef}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
         className={`w-full will-change-transform ${entryClass}`}
+        {...swipeProps}
       >
         {/* Surah header: back link, metadata, names */}
         <header className="rounded-lg border border-(--app-border) bg-(--app-surface) p-4 shadow-sm">
