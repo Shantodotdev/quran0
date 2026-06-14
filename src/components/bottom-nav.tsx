@@ -1,5 +1,5 @@
 import { Link, useRouterState } from '@tanstack/react-router'
-import { BookOpen, Bookmark, Brain, TrendingUp } from 'lucide-react'
+import { BookOpen, Bookmark, Brain, Heart, TrendingUp } from 'lucide-react'
 
 export function BottomNav() {
   const pathname = useRouterState({
@@ -9,10 +9,11 @@ export function BottomNav() {
   const isBookmarksActive = pathname.startsWith('/bookmarks')
   const isProgressActive = pathname.startsWith('/progress')
   const isMemorizeActive = pathname.startsWith('/memorize')
+  const isMotivationActive = pathname.startsWith('/motivation')
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-(--app-border) bg-(--app-surface-raised) px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur">
-      <div className="mx-auto grid max-w-2xl grid-cols-4 gap-2">
+      <div className="mx-auto grid max-w-2xl grid-cols-5 gap-2">
         <Link
           to="/"
           className={getNavItemClassName(isQuranActive)}
@@ -40,6 +41,13 @@ export function BottomNav() {
           aria-label="Memorization Helper"
         >
           <Brain className="h-5 w-5" aria-hidden="true" />
+        </Link>
+        <Link
+          to="/motivation"
+          className={getNavItemClassName(isMotivationActive)}
+          aria-label="Motivation"
+        >
+          <Heart className="h-5 w-5" aria-hidden="true" />
         </Link>
       </div>
     </nav>
