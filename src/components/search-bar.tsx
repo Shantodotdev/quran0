@@ -16,6 +16,19 @@ const MAX_RECENT = 5
 const SUGGESTED_SURAHS = [1, 36, 55, 112] // Al-Fatihah, Ya-Sin, Ar-Rahman, Al-Ikhlas,
 
 /**
+ * Normalizes text by converting to lowercase, removing diacritics/accents,
+ * and stripping out all non-alphanumeric punctuation (hyphens, apostrophes, spaces).
+ * Works across all languages due to unicode properties.
+ */
+function normalizeText(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') // Remove diacritics / accents
+    .replace(/[^\p{L}\p{N}]/gu, '')  // Keep only letters and numbers
+}
+
+/**
  * Search panel that slides down below the navbar. Filters all 114 surahs
  * in memory against nameSimple, banglaName, translatedNameBn, and nameArabic.
  * Displays matching results as links to /surah/$surahId.
@@ -30,17 +43,29 @@ export function SearchBar({ open, onClose }: SearchBarProps) {
   // Filter surahs against the query — runs synchronously on every keystroke
   // since 114 items is trivially fast.
   const results = useMemo(() => {
-    if (!query.trim()) return []
+    const trimmedQuery = query.trim()
+    if (!trimmedQuery) return []
 
-    const q = query.toLowerCase()
+    const normalizedQuery = normalizeText(trimmedQuery)
+
     return getAllSurahs()
-      .filter(
-        (s) =>
-          s.nameSimple.toLowerCase().includes(q) ||
-          s.banglaName.toLowerCase().includes(q) ||
-          s.translatedNameBn.toLowerCase().includes(q) ||
-          s.nameArabic.includes(query),
-      )
+      .filter((s) => {
+        // 1. Match by Surah ID (exact or partial)
+        if (s.id.toString() === trimmedQuery || (normalizedQuery && s.id.toString().includes(normalizedQuery))) {
+          return true
+        }
+
+        // If only punctuation/spaces were typed and normalized query is empty, do not match text fields
+        if (!normalizedQuery) return false
+
+        // 2. Match by normalized name fields
+        return (
+          normalizeText(s.nameSimple).includes(normalizedQuery) ||
+          normalizeText(s.banglaName).includes(normalizedQuery) ||
+          normalizeText(s.translatedNameBn).includes(normalizedQuery) ||
+          s.nameArabic.includes(trimmedQuery)
+        )
+      })
       .slice(0, 30)
   }, [query])
 
