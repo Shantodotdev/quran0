@@ -1,4 +1,5 @@
 import { useEffect, Suspense, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Link,
   createFileRoute,
@@ -7,7 +8,7 @@ import {
   Await,
   useNavigate,
 } from '@tanstack/react-router'
-import { Bookmark, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react'
+import { Bookmark, ChevronLeft, ChevronRight, Play, Pause, Loader2, ArrowUp } from 'lucide-react'
 
 import { getSurahById, getVersesBySurah } from '#/data/quran/quran-data'
 import { useSettingsStore } from '#/stores/settings'
@@ -154,6 +155,27 @@ function SurahPage() {
   const activePlayingVerse = isCurrentSurah ? activeVerseKey : null
 
   const navigate = useNavigate()
+
+  // Track scroll position to conditionally show Back to Top button
+  const hasAudioPlayer = useAudioStore((s) => s.currentSurahId !== null)
+  const [showScrollTop, setShowScrollTop] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   // Differentiate between a direct page refresh (which should render instantly without transitions)
   // and client-side page transitions (which should play the right-to-left navigation animation).
@@ -387,6 +409,26 @@ function SurahPage() {
           </Suspense>
         ) : (
           <VerseListLoader />
+        )}
+        {/* Floating Back to Top Button rendered via Portal to bypass parent transform offsets */}
+        {mounted && typeof window !== 'undefined' && createPortal(
+          <button
+            type="button"
+            onClick={scrollToTop}
+            className={`fixed right-4 z-30 flex size-10 items-center justify-center rounded-full bg-(--app-surface-raised) border border-(--app-border) text-(--app-accent) shadow-lg shadow-black/25 transition-all duration-300 focus:outline-none hover:bg-(--app-hover-bg) cursor-pointer ${
+              hasAudioPlayer
+                ? 'bottom-[calc(148px+env(safe-area-inset-bottom))]'
+                : 'bottom-[calc(86px+env(safe-area-inset-bottom))]'
+            } ${
+              showScrollTop
+                ? 'opacity-100 translate-y-0 scale-100'
+                : 'opacity-0 translate-y-4 scale-90 pointer-events-none'
+            }`}
+            aria-label="Scroll to top"
+          >
+            <ArrowUp className="size-5" />
+          </button>,
+          document.body
         )}
       </div>
     </div>
