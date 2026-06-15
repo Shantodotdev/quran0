@@ -7,6 +7,7 @@ import { Navbar } from '#/components/navbar'
 import { PwaInstallPrompt } from '#/components/pwa-install-prompt'
 import { AudioPlayer } from '#/components/audio-player'
 import { useThemeStore } from '#/stores/theme'
+import { useAudioStore } from '#/stores/audio'
 import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
@@ -109,6 +110,10 @@ function NavigationTracker() {
 }
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  // Expand bottom padding when the audio player is visible so the last
+  // verse card can be scrolled fully above the floating player UI.
+  const hasAudioPlayer = useAudioStore((s) => s.currentSurahId !== null)
+
   return (
     <html lang="en">
       <head>
@@ -119,7 +124,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <NavigationTracker />
         <div className="min-h-screen bg-(--app-bg) text-(--app-text-primary)">
           <Navbar />
-          <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 pb-28 pt-5 sm:px-6 sm:pt-8">
+          <main
+            className={`mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 pt-5 sm:px-6 sm:pt-8 ${
+              hasAudioPlayer ? 'pb-56' : 'pb-28'
+            }`}
+          >
             {children}
           </main>
           <AudioPlayer />
