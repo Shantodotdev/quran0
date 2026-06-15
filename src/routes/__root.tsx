@@ -72,12 +72,38 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 })
 
+// Global module-level flag to track the initial execution load of the client application.
+// Set to true immediately when the JS bundle evaluates, surviving React hydration, mounts,
+// and router-settling.
+if (
+  typeof window !== 'undefined' &&
+  (window as any).__quran0_first_load === undefined
+) {
+  ;(window as any).__quran0_first_load = true
+}
+
 function ThemeSync() {
   const theme = useThemeStore((s) => s.theme)
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
+
+  return null
+}
+
+// Mounts client-side and registers when the first page load has fully settled.
+// Flips the first_load flag to false after a 500ms delay to ensure subsequent
+// navigations play the transitions correctly.
+function NavigationTracker() {
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const timer = setTimeout(() => {
+        ;(window as any).__quran0_first_load = false
+      }, 500)
+      return () => clearTimeout(timer)
+    }
+  }, [])
 
   return null
 }
@@ -90,6 +116,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body suppressHydrationWarning>
         <ThemeSync />
+        <NavigationTracker />
         <div className="min-h-screen bg-(--app-bg) text-(--app-text-primary)">
           <Navbar />
           <main className="mx-auto flex w-full max-w-2xl flex-col gap-6 px-4 pb-28 pt-5 sm:px-6 sm:pt-8">

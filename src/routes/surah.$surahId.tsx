@@ -155,10 +155,20 @@ function SurahPage() {
 
   const navigate = useNavigate()
 
-  // Track animation and navigation state
+  // Differentiate between a direct page refresh (which should render instantly without transitions)
+  // and client-side page transitions (which should play the right-to-left navigation animation).
+  const isTransitioning =
+    typeof window !== 'undefined' &&
+    (window as any).__quran0_first_load === false
+
+  // Track animation and navigation state.
+  // On direct load/refresh, initialize with static classes and instant rendering to support SSR/SEO.
+  // On client transitions, initialize with the right-to-left animation and hide verses during slide.
   const [currentSurahId, setCurrentSurahId] = useState(surah.id)
-  const [entryClass, setEntryClass] = useState('animate-slide-in-from-right')
-  const [shouldRenderVerses, setShouldRenderVerses] = useState(false)
+  const [entryClass, setEntryClass] = useState(
+    isTransitioning ? 'animate-slide-in-from-right' : '',
+  )
+  const [shouldRenderVerses, setShouldRenderVerses] = useState(!isTransitioning)
 
   // Derive animation direction synchronously during render to avoid flashes
   if (surah.id !== currentSurahId) {
@@ -177,8 +187,12 @@ function SurahPage() {
     }
   }, [entryClass])
 
-  // Delay rendering the verses list until the slide animation completes
+  // Delay rendering the verses list until the slide animation completes.
+  // Skip this delay entirely on direct reload to avoid showing a loading spinner.
   useEffect(() => {
+    if (!isTransitioning) {
+      return
+    }
     setShouldRenderVerses(false)
     const timer = setTimeout(() => {
       setShouldRenderVerses(true)
