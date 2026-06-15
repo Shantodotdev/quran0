@@ -3,6 +3,8 @@
 @theme {
   --animate-dropdown-in: dropdown-in 0.15s ease-out;
   --animate-dropdown-out: dropdown-out 0.15s ease-in forwards;
+  --animate-dropdown-up-in: dropdown-up-in 0.15s ease-out;
+  --animate-dropdown-up-out: dropdown-up-out 0.15s ease-in forwards;
 }
 
 :root,
@@ -150,6 +152,28 @@ body {
   to {
     opacity: 0;
     transform: translateY(-4px) scale(0.96);
+  }
+}
+
+@keyframes dropdown-up-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdown-up-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
   }
 }
 
