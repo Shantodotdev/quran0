@@ -8,8 +8,20 @@ import { persist } from 'zustand/middleware'
 export interface TimestampSegment {
   verse_key: string
   timestamp_from: number // Start time in milliseconds
-  timestamp_to: number   // End time in milliseconds
-  duration: number       // Segment duration in milliseconds
+  timestamp_to: number // End time in milliseconds
+  duration: number // Segment duration in milliseconds
+}
+
+export const AVAILABLE_RECITERS = [
+  { id: 7, name: 'Mishary Rashid Alafasy' },
+  { id: 9, name: 'Siddiq al-Minshawi' },
+  { id: 3, name: 'Abdur-Rahman as-Sudais' },
+  { id: 4, name: 'Abu Bakr al-Shatri' },
+  { id: 5, name: 'Hani ar-Rifai' },
+]
+
+export function getReciterName(id: number): string {
+  return AVAILABLE_RECITERS.find((r) => r.id === id)?.name || 'Unknown Reciter'
 }
 
 /**
@@ -61,7 +73,7 @@ export interface AudioState {
 
 /**
  * Persistent Zustand store that manages Quran recitation audio playback.
- * 
+ *
  * Persists user playback settings (autoplay, repeat, playbackRate, and reciterId)
  * to localStorage under 'quran0-audio-settings'. Runtime states (currentTime, isPlaying,
  * activeVerseKey, etc.) are kept in memory to manage playback events reactively.
@@ -93,7 +105,7 @@ export const useAudioStore = create<AudioState>()(
       /**
        * Prepares and starts playback for the requested Surah.
        * Queries the Quran.com API to fetch timing segments for verse highlighting.
-       * 
+       *
        * Provider Contract:
        * - API Endpoint: `https://api.quran.com/api/v4/chapter_recitations/{reciterId}/{surahId}?segments=true`
        * - Timestamps: Millisecond timing ranges mapping parts of the audio file to individual verses (e.g. `1:1`, `1:2`).
@@ -165,7 +177,7 @@ export const useAudioStore = create<AudioState>()(
       setCurrentTime: (time) =>
         set((state) => {
           const currentTimeMs = time * 1000
-          
+
           // Scan segment timestamps to find the verse key corresponding to the elapsed time
           const match = state.timestamps.find(
             (t) =>
