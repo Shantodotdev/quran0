@@ -10,7 +10,7 @@
     "generate-quran-data": "node scripts/generate-quran-data.mjs",
     "generate-routes": "tsr generate",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "vite preview --host",
     "test": "vitest run",
     "lint": "eslint",
     "format": "prettier --write . && eslint --fix",
