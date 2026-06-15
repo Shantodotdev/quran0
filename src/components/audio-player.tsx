@@ -83,6 +83,27 @@ export function AudioPlayer() {
     syncPlaybackRate()
   }, [playbackRate, audioUrl])
 
+  // Sync position state with lock screen media player
+  useEffect(() => {
+    if (
+      'mediaSession' in navigator &&
+      duration > 0 &&
+      !isNaN(duration) &&
+      !isNaN(currentTime) &&
+      !isNaN(playbackRate)
+    ) {
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: duration,
+          playbackRate: playbackRate,
+          position: Math.max(0, Math.min(currentTime, duration)),
+        })
+      } catch (err) {
+        console.warn('Error setting mediaSession position state:', err)
+      }
+    }
+  }, [currentTime, duration, playbackRate])
+
   // Media Session API Sync for lock screen controls
   useEffect(() => {
     if (!surah || !('mediaSession' in navigator)) return
