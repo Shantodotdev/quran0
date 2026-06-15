@@ -9,7 +9,7 @@ import {
   Repeat,
   Loader2,
 } from 'lucide-react'
-import { useAudioStore } from '#/stores/audio'
+import { useAudioStore, getReciterName } from '#/stores/audio'
 import { getSurahById } from '#/data/quran/quran-data'
 
 export function AudioPlayer() {
@@ -23,6 +23,7 @@ export function AudioPlayer() {
     repeat,
     isBuffering,
     audioUrl,
+    reciterId,
     setPlaying,
     setCurrentTime,
     setDuration,
@@ -88,7 +89,7 @@ export function AudioPlayer() {
 
     navigator.mediaSession.metadata = new MediaMetadata({
       title: surah.nameSimple,
-      artist: 'Mishary Rashid Alafasy',
+      artist: getReciterName(reciterId),
       album: 'Quran Recitation',
       artwork: [
         { src: '/logo.png', sizes: '192x192', type: 'image/png' },
@@ -119,7 +120,7 @@ export function AudioPlayer() {
         navigator.mediaSession.setActionHandler('nexttrack', null)
       }
     }
-  }, [surah, currentSurahId, playSurah, setPlaying])
+  }, [surah, currentSurahId, reciterId, playSurah, setPlaying])
 
   if (!currentSurahId || !surah) return null
 
@@ -203,7 +204,7 @@ export function AudioPlayer() {
               {surah.nameSimple}
             </h4>
             <p className="truncate text-xs text-(--app-text-tertiary)">
-              {surah.banglaName} · Reciter: Mishary Alafasy
+              {surah.banglaName} · Reciter: {getReciterName(reciterId)}
             </p>
           </div>
 

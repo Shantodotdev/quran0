@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Minus, Plus, RotateCcw, X } from 'lucide-react'
 import { useSettingsStore } from '#/stores/settings'
 import { ThemeSelector } from './theme-selector'
+import { ReciterSelector } from './reciter-selector'
 
 interface SettingsSidebarProps {
   open: boolean
@@ -118,6 +119,8 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
     setDisplayBengaliMeaning,
     resetSettings,
   } = useSettingsStore()
+
+
 
   // --- drag-to-close state ---
   const panelRef = useRef<HTMLDivElement>(null)
@@ -264,6 +267,15 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
                 checked={displayBengaliMeaning}
                 onChange={setDisplayBengaliMeaning}
               />
+            </section>
+
+            <div className="h-px bg-(--app-border)" />
+
+            <section>
+              <span className="mb-2 block text-sm font-medium text-(--app-text-primary)">
+                Reciter
+              </span>
+              <ReciterSelector />
             </section>
 
             <div className="h-px bg-(--app-border)" />
