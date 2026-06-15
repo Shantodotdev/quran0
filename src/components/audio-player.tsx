@@ -56,18 +56,54 @@ export function AudioPlayer() {
     }
   }, [currentSurahId, pathname, navigate])
 
-  // Sync isPlaying with HTML audio play/pause
+  const playPromiseRef = useRef<Promise<void> | null>(null)
+
+  // Sync isPlaying with HTML audio play/pause, handling asynchronous race conditions.
+  // HTML5 Audio play() returns a promise; pausing before it resolves triggers a browser error.
   useEffect(() => {
     const audio = audioRef.current
     if (!audio || !audioUrl) return
 
     if (isPlaying) {
-      audio.play().catch((err) => {
-        console.warn('Playback failed or interrupted:', err)
-        setPlaying(false)
-      })
+      // If a play promise is already loading, do not trigger another play request.
+      if (playPromiseRef.current) return
+
+      const promise = audio.play()
+      playPromiseRef.current = promise
+      promise
+        .then(() => {
+          playPromiseRef.current = null
+          // Read fresh store state; if the user toggled pause while loading, pause immediately.
+          // We query getState() directly because the `isPlaying` closure variable might be stale.
+          if (!useAudioStore.getState().isPlaying) {
+            audio.pause()
+          }
+        })
+        .catch((err) => {
+          playPromiseRef.current = null
+          console.warn('Playback failed or interrupted:', err)
+          if (useAudioStore.getState().isPlaying) {
+            setPlaying(false)
+          }
+        })
     } else {
-      audio.pause()
+      // If a play promise is currently loading, wait for it to resolve before calling pause.
+      // This prevents interrupting the play request and triggering a browser DomException error.
+      if (playPromiseRef.current) {
+        playPromiseRef.current
+          .then(() => {
+            // Verify they are still paused when play resolves before executing the pause.
+            if (!useAudioStore.getState().isPlaying) {
+              audio.pause()
+            }
+          })
+          .catch(() => {
+            // If play failed, the audio engine is already in a paused/stopped state.
+          })
+      } else {
+        // No pending play promise, pause natively immediately.
+        audio.pause()
+      }
     }
   }, [isPlaying, audioUrl, setPlaying])
 
