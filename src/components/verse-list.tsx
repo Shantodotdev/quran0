@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import type { QuranVerse } from '#/data/quran/types'
+import { useAudioStore } from '#/stores/audio'
 
 // Module-level flag to track initial load
 let isInitialLoad = true
@@ -113,6 +114,8 @@ function VerseCard({
   isHighlighted?: boolean
   isPlayingHighlighted?: boolean
 }) {
+  const isPlaying = useAudioStore((s) => s.isPlaying)
+  const seekToVerse = useAudioStore((s) => s.seekToVerse)
   const cardRef = useRef<HTMLDivElement>(null)
 
   // Scroll handler for search highlight (run on mount/trigger)
@@ -153,7 +156,14 @@ function VerseCard({
   return (
     <article
       ref={cardRef}
+      onClick={() => {
+        if (isPlaying) {
+          seekToVerse(verse.verseKey)
+        }
+      }}
       className={`p-3 rounded-lg transition-all duration-300 border-l-4 ${
+        isPlaying ? 'cursor-pointer hover:bg-(--app-hover-bg)/30' : ''
+      } ${
         isHighlighted
           ? 'animate-highlight bg-(--app-accent-soft)/40 border-transparent'
           : isPlayingHighlighted

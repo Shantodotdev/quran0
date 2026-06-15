@@ -55,6 +55,7 @@ export interface AudioState {
   audioUrl: string | null
   timestamps: TimestampSegment[]
   activeVerseKey: string | null
+  seekTimeTarget: number | null
 
   // Actions
   setAutoplay: (autoplay: boolean) => void
@@ -69,6 +70,7 @@ export interface AudioState {
   setDuration: (duration: number) => void
   setBuffering: (buffering: boolean) => void
   stop: () => void
+  seekToVerse: (verseKey: string) => void
 }
 
 /**
@@ -96,6 +98,7 @@ export const useAudioStore = create<AudioState>()(
       audioUrl: null,
       timestamps: [],
       activeVerseKey: null,
+      seekTimeTarget: null,
 
       setAutoplay: (autoplay) => set({ autoplay }),
       setRepeat: (repeat) => set({ repeat }),
@@ -123,6 +126,7 @@ export const useAudioStore = create<AudioState>()(
           activeVerseKey: null,
           timestamps: [],
           audioUrl: null,
+          seekTimeTarget: null,
         })
 
         const reciterId = get().reciterId
@@ -204,7 +208,18 @@ export const useAudioStore = create<AudioState>()(
           timestamps: [],
           activeVerseKey: null,
           isBuffering: false,
+          seekTimeTarget: null,
         }),
+
+      seekToVerse: (verseKey) => {
+        const { timestamps, isPlaying } = get()
+        if (!isPlaying) return
+
+        const segment = timestamps.find((t) => t.verse_key === verseKey)
+        if (segment) {
+          set({ seekTimeTarget: segment.timestamp_from / 1000 })
+        }
+      },
     }),
     {
       name: 'quran0-audio-settings',

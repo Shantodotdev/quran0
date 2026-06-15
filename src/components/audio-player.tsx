@@ -24,6 +24,7 @@ export function AudioPlayer() {
     isBuffering,
     audioUrl,
     reciterId,
+    seekTimeTarget,
     setPlaying,
     setCurrentTime,
     setDuration,
@@ -118,6 +119,16 @@ export function AudioPlayer() {
   useEffect(() => {
     syncPlaybackRate()
   }, [playbackRate, audioUrl])
+
+  // Listen for external requests to seek (e.g. clicking/touching an ayah card)
+  useEffect(() => {
+    const audio = audioRef.current
+    if (audio && seekTimeTarget !== null && !isNaN(seekTimeTarget)) {
+      audio.currentTime = seekTimeTarget
+      // Instantly clear the target in the store so it doesn't run repeatedly
+      useAudioStore.setState({ seekTimeTarget: null })
+    }
+  }, [seekTimeTarget])
 
   // Sync position state with lock screen media player
   useEffect(() => {
