@@ -1,34 +1,9 @@
 import { Download, Share, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { usePwaStore } from '#/stores/pwa'
 
 const INSTALL_PROMPT_DELAY_MS = 1_000
 const SESSION_DISMISSAL_KEY = 'quran0-install-prompt-dismissed'
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>
-  userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed'
-    platform: string
-  }>
-}
-
-function isRunningAsInstalledApp() {
-  const navigatorWithStandalone = navigator as Navigator & {
-    standalone?: boolean
-  }
-
-  return (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    navigatorWithStandalone.standalone === true
-  )
-}
-
-function isIosDevice() {
-  return (
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  )
-}
 
 function wasDismissedThisSession() {
   try {
@@ -48,8 +23,8 @@ function rememberSessionDismissal() {
 
 /** Registers offline support and offers installation when the browser allows it. */
 export function PwaInstallPrompt() {
-  const [installEvent, setInstallEvent] =
-    useState<BeforeInstallPromptEvent | null>(null)
+  const { installPromptEvent, isInstalled, isIos, setInstallPromptEvent } =
+    usePwaStore()
   const [promptMode, setPromptMode] = useState<'hidden' | 'native' | 'ios'>(
     'hidden',
   )
@@ -58,46 +33,36 @@ export function PwaInstallPrompt() {
     if (import.meta.env.PROD && 'serviceWorker' in navigator) {
       void navigator.serviceWorker.register('/sw.js')
     }
+  }, [])
 
-    if (isRunningAsInstalledApp() || wasDismissedThisSession()) {
+  useEffect(() => {
+    if (isInstalled || wasDismissedThisSession()) {
+      setPromptMode('hidden')
       return
     }
 
     let revealTimer: ReturnType<typeof setTimeout> | undefined
 
-    const handleInstallPrompt = (event: Event) => {
-      event.preventDefault()
-      const promptEvent = event as BeforeInstallPromptEvent
-      setInstallEvent(promptEvent)
+    if (installPromptEvent) {
       clearTimeout(revealTimer)
       revealTimer = setTimeout(
         () => setPromptMode('native'),
         INSTALL_PROMPT_DELAY_MS,
       )
-    }
-
-    const handleInstalled = () => {
+    } else if (isIos) {
       clearTimeout(revealTimer)
-      setInstallEvent(null)
-      setPromptMode('hidden')
-    }
-
-    window.addEventListener('beforeinstallprompt', handleInstallPrompt)
-    window.addEventListener('appinstalled', handleInstalled)
-
-    if (isIosDevice()) {
       revealTimer = setTimeout(
         () => setPromptMode('ios'),
         INSTALL_PROMPT_DELAY_MS,
       )
+    } else {
+      setPromptMode('hidden')
     }
 
     return () => {
       clearTimeout(revealTimer)
-      window.removeEventListener('beforeinstallprompt', handleInstallPrompt)
-      window.removeEventListener('appinstalled', handleInstalled)
     }
-  }, [])
+  }, [installPromptEvent, isInstalled, isIos])
 
   const dismiss = () => {
     rememberSessionDismissal()
@@ -105,14 +70,14 @@ export function PwaInstallPrompt() {
   }
 
   const install = async () => {
-    if (!installEvent) {
+    if (!installPromptEvent) {
       return
     }
 
-    await installEvent.prompt()
-    await installEvent.userChoice
+    await installPromptEvent.prompt()
+    await installPromptEvent.userChoice
     rememberSessionDismissal()
-    setInstallEvent(null)
+    setInstallPromptEvent(null)
     setPromptMode('hidden')
   }
 

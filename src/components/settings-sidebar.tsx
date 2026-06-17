@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { Minus, Plus, RotateCcw, X } from 'lucide-react'
+import { CheckCircle2, Download, Minus, Plus, RotateCcw, Share, X } from 'lucide-react'
 import { useSettingsStore } from '#/stores/settings'
+import { usePwaStore } from '#/stores/pwa'
 import { ThemeSelector } from './theme-selector'
 import { ReciterSelector } from './reciter-selector'
 
@@ -120,6 +121,19 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
     resetSettings,
   } = useSettingsStore()
 
+  const { installPromptEvent, isInstalled, isIos, setInstallPromptEvent } =
+    usePwaStore()
+  const [showIosInstructions, setShowIosInstructions] = useState(false)
+
+  const handleInstallClick = async () => {
+    if (!installPromptEvent) return
+    await installPromptEvent.prompt()
+    const { outcome } = await installPromptEvent.userChoice
+    if (outcome === 'accepted') {
+      setInstallPromptEvent(null)
+    }
+  }
+
 
 
   // --- drag-to-close state ---
@@ -134,6 +148,7 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
       document.body.style.overflow = 'hidden'
       // reset drag position each time it opens
       setTranslateX(0)
+      setShowIosInstructions(false)
     }
     return () => {
       document.body.style.overflow = ''
@@ -277,6 +292,78 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
               </span>
               <ReciterSelector />
             </section>
+
+            {/* App Installation */}
+            {(isInstalled || installPromptEvent || isIos) && (
+              <>
+                <div className="h-px bg-(--app-border)" />
+                <section className="rounded-2xl border border-(--app-border) bg-(--app-surface-raised) p-4 flex flex-col gap-3">
+                  {isInstalled ? (
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-500">
+                        <CheckCircle2 className="size-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-(--app-text-primary)">
+                          Quran0 Installed
+                        </h3>
+                        <p className="mt-1 text-xs text-(--app-text-secondary) leading-relaxed">
+                          Running in app mode. Offline reading is fully supported and enabled.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-start gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-(--app-accent-soft) text-(--app-accent)">
+                          <Download className="size-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold text-(--app-text-primary)">
+                            Install Quran0 App
+                          </h3>
+                          <p className="mt-1 text-xs text-(--app-text-secondary) leading-relaxed">
+                            Read all 114 surahs offline directly from your home screen.
+                          </p>
+                        </div>
+                      </div>
+
+                      {isIos ? (
+                        <div className="flex flex-col gap-2">
+                          <button
+                            type="button"
+                            onClick={() => setShowIosInstructions(!showIosInstructions)}
+                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-(--app-control) px-3 py-2 text-sm font-medium text-(--app-text-primary) transition-colors hover:bg-(--app-hover-bg)"
+                          >
+                            <Share className="size-4" />
+                            {showIosInstructions ? 'Hide Instructions' : 'How to Install'}
+                          </button>
+
+                          {showIosInstructions && (
+                            <div className="rounded-lg bg-(--app-control) p-3 text-xs text-(--app-text-secondary) leading-relaxed animate-fade-in-up">
+                              <p className="mb-2">To install on iOS/Safari:</p>
+                              <ol className="list-decimal pl-4 space-y-1">
+                                <li>Tap the <strong>Share</strong> button in Safari's bottom toolbar.</li>
+                                <li>Scroll down and select <strong>Add to Home Screen</strong>.</li>
+                              </ol>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => void handleInstallClick()}
+                          className="flex items-center justify-center gap-2 rounded-xl bg-(--app-accent-bg) px-3 py-2 text-sm font-semibold text-(--app-accent-text) transition-colors hover:opacity-90"
+                        >
+                          <Download className="size-4" />
+                          Install App
+                        </button>
+                      )}
+                    </>
+                  )}
+                </section>
+              </>
+            )}
 
             <div className="h-px bg-(--app-border)" />
 

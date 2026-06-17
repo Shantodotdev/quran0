@@ -8,6 +8,7 @@ import { PwaInstallPrompt } from '#/components/pwa-install-prompt'
 import { AudioPlayer } from '#/components/audio-player'
 import { useThemeStore } from '#/stores/theme'
 import { useAudioStore } from '#/stores/audio'
+import { usePwaStore } from '#/stores/pwa'
 import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
@@ -113,6 +114,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   // Expand bottom padding when the audio player is visible so the last
   // verse card can be scrolled fully above the floating player UI.
   const hasAudioPlayer = useAudioStore((s) => s.currentSurahId !== null)
+  const { initPwaListeners } = usePwaStore()
+
+  useEffect(() => {
+    return initPwaListeners()
+  }, [initPwaListeners])
 
   return (
     <html lang="en">
