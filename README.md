@@ -2,6 +2,8 @@
 
 Quran0 is a mobile-first Quran reader web application built with **TanStack Start**, designed for offline readability and learning order progression.
 
+**Live:** https://quran0.online
+
 ---
 
 ## Technical & Architecture Documentation
