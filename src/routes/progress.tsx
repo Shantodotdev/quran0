@@ -1,5 +1,12 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { ChevronRight, BookOpen, Volume2, Bookmark } from 'lucide-react'
+import { createFileRoute } from '@tanstack/react-router'
+import {
+  ChevronRight,
+  BookOpen,
+  Volume2,
+  Bookmark,
+  Activity,
+} from 'lucide-react'
+import { useProgressStore, getLocalDateString } from '#/stores/progress'
 
 export const Route = createFileRoute('/progress')({
   component: ProgressPage,
@@ -16,28 +23,51 @@ export const Route = createFileRoute('/progress')({
   }),
 })
 
+function formatTimeAgo(isoString: string): string {
+  try {
+    const date = new Date(isoString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMins / 60)
+
+    if (diffMs < 0 || diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+
+    // Check if yesterday
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday'
+    }
+
+    return date.toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+    })
+  } catch {
+    return 'Recently'
+  }
+}
+
 function ProgressPage() {
-  // Standard mock data
-  const streak = 5
-  const readingTimeToday = 18
-  const versesReadToday = 12
+  const activities = useProgressStore((s) => s.activities)
 
-  const weeklyData = [
-    { day: 'Mon', mins: 15 },
-    { day: 'Tue', mins: 8 },
-    { day: 'Wed', mins: 25 },
-    { day: 'Thu', mins: 12 },
-    { day: 'Fri', mins: 0 },
-    { day: 'Sat', mins: 18 },
-    { day: 'Sun', mins: 5 },
-  ]
+  const getCurrentStreak = useProgressStore((s) => s.getCurrentStreak)
+  const getStatsForDate = useProgressStore((s) => s.getStatsForDate)
+  const getWeeklyData = useProgressStore((s) => s.getWeeklyData)
 
-  const activities = [
-    { type: 'read', label: 'Read Surah Ya-Sin', time: '15 mins ago' },
-    { type: 'audio', label: 'Listened to Surah Ya-Sin', time: '1 hour ago' },
-    { type: 'bookmark', label: 'Bookmarked verse in Surah Al-Baqarah', time: 'Yesterday' },
-    { type: 'read', label: 'Read Surah Al-Mulk', time: 'Yesterday' },
-  ]
+  // Compute reactive progress statistics
+  const streak = getCurrentStreak()
+  const todayStr = getLocalDateString()
+  const statsToday = getStatsForDate(todayStr)
+  const readingTimeToday = statsToday.mins
+  const versesReadToday = statsToday.verses
+  const weeklyData = getWeeklyData()
+
+  // Get max metric value to scale weekly bar chart (min scale of 30 mins)
+  const maxMins = Math.max(30, ...weeklyData.map((d) => d.mins))
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in-up">
@@ -58,7 +88,7 @@ function ProgressPage() {
             Streak
           </span>
           <div className="mt-0.5 text-sm sm:text-xl font-bold text-(--app-text-primary) whitespace-nowrap w-full truncate">
-            {streak} Days
+            {streak} {streak === 1 ? 'Day' : 'Days'}
           </div>
         </div>
 
@@ -76,7 +106,7 @@ function ProgressPage() {
             Read Today
           </span>
           <div className="mt-0.5 text-sm sm:text-xl font-bold text-(--app-text-primary) whitespace-nowrap w-full truncate">
-            {versesReadToday} Verses
+            {versesReadToday} {versesReadToday === 1 ? 'Verse' : 'Verses'}
           </div>
         </div>
       </section>
@@ -88,11 +118,13 @@ function ProgressPage() {
         </h2>
         <div className="h-36 flex items-end justify-between gap-3 px-1">
           {weeklyData.map((d) => {
-            // Scale bar height relative to a 30 mins standard target
-            const pct = Math.min(100, (d.mins / 30) * 100)
+            const pct = Math.min(100, (d.mins / maxMins) * 100)
             return (
-              <div key={d.day} className="flex-1 flex flex-col items-center gap-1.5">
-                <span className="text-[10px] text-(--app-text-muted) font-semibold">
+              <div
+                key={d.dateStr}
+                className="flex-1 flex flex-col items-center gap-1.5"
+              >
+                <span className="text-xs text-(--app-text-muted) font-semibold">
                   {d.mins > 0 ? `${d.mins}m` : '-'}
                 </span>
                 <div className="w-full h-24 bg-(--app-control) rounded-md overflow-hidden flex items-end">
@@ -116,55 +148,63 @@ function ProgressPage() {
         <h2 className="text-sm font-semibold text-(--app-text-primary) mb-1 border-b border-(--app-border)/40 pb-2">
           Recent Activity
         </h2>
-        <div className="flex flex-col gap-3.5">
-          {activities.map((act, i) => {
-            // Pick a suitable icon based on type
-            const getIcon = () => {
-              switch (act.type) {
-                case 'read':
-                  return <BookOpen className="size-4 text-emerald-400" />
-                case 'audio':
-                  return <Volume2 className="size-4 text-sky-400" />
-                case 'bookmark':
-                  return <Bookmark className="size-4 text-pink-400 fill-current" />
-                default:
-                  return <ChevronRight className="size-4 text-(--app-text-muted)" />
+        {activities.length === 0 ? (
+          <div className="py-6 text-center">
+            <p className="text-xs text-(--app-text-muted)">
+              No recent activity. Read a surah or play recitations to log your
+              progress.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3.5">
+            {activities.map((act, i) => {
+              // Pick a suitable icon based on type
+              const getIcon = () => {
+                switch (act.type) {
+                  case 'read':
+                    return <BookOpen className="size-4.5 text-emerald-400" />
+                  case 'audio':
+                    return <Volume2 className="size-4.5 text-sky-400" />
+                  case 'bookmark':
+                    return (
+                      <Bookmark className="size-4.5 text-pink-400 fill-current" />
+                    )
+                  case 'visit':
+                    return <Activity className="size-4.5 text-orange-400" />
+                  default:
+                    return (
+                      <ChevronRight className="size-4.5 text-(--app-text-muted)" />
+                    )
+                }
               }
-            }
 
-            return (
-              <div
-                key={i}
-                className="flex items-center gap-3 border-b border-(--app-border)/30 pb-3 last:border-0 last:pb-0"
-              >
-                <span className="shrink-0 flex items-center">
-                  {getIcon()}
-                </span>
-                <div className="flex-1">
-                  <span className="text-xs font-semibold text-(--app-text-primary)">
-                    {act.label}
+              return (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 border-b border-(--app-border)/30 pb-3 last:border-0 last:pb-0"
+                >
+                  <span className="shrink-0 flex items-center">
+                    {getIcon()}
+                  </span>
+                  <div className="flex-1">
+                    <span className="text-sm font-semibold text-(--app-text-primary)">
+                      {act.label}
+                    </span>
+                    {act.detail && (
+                      <span className="text-xs text-(--app-text-muted) block mt-0.5 leading-normal">
+                        {act.detail}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-(--app-text-muted) font-semibold whitespace-nowrap">
+                    {formatTimeAgo(act.time)}
                   </span>
                 </div>
-                <span className="text-[10px] text-(--app-text-muted) font-semibold whitespace-nowrap">
-                  {act.time}
-                </span>
-              </div>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
+        )}
       </section>
-
-      {/* Footer Navigation Link */}
-      <footer className="mt-2 text-center">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1 text-xs font-bold text-(--app-accent) hover:underline p-1 cursor-pointer"
-        >
-          <span>Return to Quran Index</span>
-          <ChevronRight className="size-3.5" />
-        </Link>
-      </footer>
     </div>
   )
 }
-
