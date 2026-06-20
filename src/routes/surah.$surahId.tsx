@@ -14,7 +14,6 @@ import {
   ChevronRight,
   Play,
   Pause,
-  Loader2,
   ArrowUp,
 } from 'lucide-react'
 
