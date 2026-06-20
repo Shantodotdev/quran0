@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { useAudioStore, getReciterName } from '#/stores/audio'
 import { getSurahById } from '#/data/quran/quran-data'
+import { useProgressStore } from '#/stores/progress'
 
 export function AudioPlayer() {
   const {
@@ -189,6 +190,17 @@ export function AudioPlayer() {
       }
     }
   }, [surah, currentSurahId, reciterId, playSurah, setPlaying])
+
+  // Track active audio listening duration
+  useEffect(() => {
+    if (!isPlaying || !currentSurahId) return
+
+    const interval = setInterval(() => {
+      useProgressStore.getState().logListeningTime(currentSurahId, 5)
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [isPlaying, currentSurahId])
 
   if (!currentSurahId || !surah) return null
 
