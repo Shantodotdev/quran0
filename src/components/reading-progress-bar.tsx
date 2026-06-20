@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useProgressStore } from '#/stores/progress'
 
 /**
  * Sticky full-width reading progress bar that fills as the user scrolls
  * through the page. Pinned below the navbar (top-20) and sits below the
  * settings sidebar in the stacking order (z-40).
  */
-export function ReadingProgressBar() {
+export function ReadingProgressBar({ surahId }: { surahId?: number }) {
   const [progress, setProgress] = useState(0)
 
   useEffect(() => {
@@ -14,7 +15,12 @@ export function ReadingProgressBar() {
       const docHeight = document.documentElement.scrollHeight
       const winHeight = window.innerHeight
       const maxScroll = docHeight - winHeight
-      setProgress(maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 0)
+      const newProgress = maxScroll > 0 ? Math.min(scrollTop / maxScroll, 1) : 0
+      setProgress(newProgress)
+
+      if (surahId) {
+        useProgressStore.getState().logReadingProgress(surahId, newProgress)
+      }
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -31,7 +37,7 @@ export function ReadingProgressBar() {
       window.removeEventListener('resize', onScroll)
       observer.disconnect()
     }
-  }, [])
+  }, [surahId])
 
   return (
     <div className="fixed top-20 left-0 right-0 z-40">
