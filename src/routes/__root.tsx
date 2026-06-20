@@ -9,6 +9,7 @@ import { AudioPlayer } from '#/components/audio-player'
 import { useThemeStore } from '#/stores/theme'
 import { useAudioStore } from '#/stores/audio'
 import { usePwaStore } from '#/stores/pwa'
+import { useProgressStore } from '#/stores/progress'
 import appCss from '../styles.css?url'
 
 export const Route = createRootRoute({
@@ -115,6 +116,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   // verse card can be scrolled fully above the floating player UI.
   const hasAudioPlayer = useAudioStore((s) => s.currentSurahId !== null)
   const { initPwaListeners } = usePwaStore()
+  const logVisit = useProgressStore((s) => s.logVisit)
+
+  useEffect(() => {
+    logVisit()
+  }, [logVisit])
 
   useEffect(() => {
     return initPwaListeners()
