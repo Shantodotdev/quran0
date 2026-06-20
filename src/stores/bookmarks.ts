@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { useProgressStore } from '#/stores/progress'
 
 interface BookmarksState {
   /** Sorted array of bookmarked surah IDs (1-114). */
@@ -42,10 +43,13 @@ export const useBookmarksStore = create<BookmarksState>()(
 
       toggleBookmark: (surahId) => {
         const state = get()
-        if (state.bookmarkIds.includes(surahId)) {
+        const isCurrentlyBookmarked = state.bookmarkIds.includes(surahId)
+        if (isCurrentlyBookmarked) {
           set({ bookmarkIds: state.bookmarkIds.filter((id) => id !== surahId) })
+          useProgressStore.getState().logBookmarkActivity(surahId, false)
         } else {
           set({ bookmarkIds: [...state.bookmarkIds, surahId].sort((a, b) => a - b) })
+          useProgressStore.getState().logBookmarkActivity(surahId, true)
         }
       },
 
