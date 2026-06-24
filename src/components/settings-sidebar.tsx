@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
-import { CheckCircle2, Download, Minus, Plus, RotateCcw, Share, Tag, X } from 'lucide-react'
+import {
+  CheckCircle2,
+  Download,
+  Minus,
+  Plus,
+  RotateCcw,
+  Share,
+  Tag,
+  X,
+} from 'lucide-react'
 import { useSettingsStore } from '#/stores/settings'
 import { usePwaStore } from '#/stores/pwa'
 import { ThemeSelector } from './theme-selector'
@@ -133,8 +142,6 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
       setInstallPromptEvent(null)
     }
   }
-
-
 
   // --- drag-to-close state ---
   const panelRef = useRef<HTMLDivElement>(null)
@@ -308,7 +315,8 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
                           Quran0 Installed
                         </h3>
                         <p className="mt-1 text-xs text-(--app-text-secondary) leading-relaxed">
-                          Running in app mode. Offline reading is fully supported and enabled.
+                          Running in app mode. Offline reading is fully
+                          supported and enabled.
                         </p>
                       </div>
                     </div>
@@ -323,7 +331,8 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
                             Install Quran0 App
                           </h3>
                           <p className="mt-1 text-xs text-(--app-text-secondary) leading-relaxed">
-                            Read all 114 surahs offline directly from your home screen.
+                            Read all 114 surahs offline directly from your home
+                            screen.
                           </p>
                         </div>
                       </div>
@@ -332,19 +341,29 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
                         <div className="flex flex-col gap-2">
                           <button
                             type="button"
-                            onClick={() => setShowIosInstructions(!showIosInstructions)}
+                            onClick={() =>
+                              setShowIosInstructions(!showIosInstructions)
+                            }
                             className="flex w-full items-center justify-center gap-2 rounded-xl bg-(--app-control) px-3 py-2 text-sm font-medium text-(--app-text-primary) transition-colors hover:bg-(--app-hover-bg)"
                           >
                             <Share className="size-4" />
-                            {showIosInstructions ? 'Hide Instructions' : 'How to Install'}
+                            {showIosInstructions
+                              ? 'Hide Instructions'
+                              : 'How to Install'}
                           </button>
 
                           {showIosInstructions && (
                             <div className="rounded-lg bg-(--app-control) p-3 text-xs text-(--app-text-secondary) leading-relaxed animate-fade-in-up">
                               <p className="mb-2">To install on iOS/Safari:</p>
                               <ol className="list-decimal pl-4 space-y-1">
-                                <li>Tap the <strong>Share</strong> button in Safari's bottom toolbar.</li>
-                                <li>Scroll down and select <strong>Add to Home Screen</strong>.</li>
+                                <li>
+                                  Tap the <strong>Share</strong> button in
+                                  Safari's bottom toolbar.
+                                </li>
+                                <li>
+                                  Scroll down and select{' '}
+                                  <strong>Add to Home Screen</strong>.
+                                </li>
                               </ol>
                             </div>
                           )}
@@ -376,11 +395,39 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
               Reset to Default
             </button>
 
-            <div className="mt-6 flex items-center justify-center gap-1.5 text-(--app-text-tertiary)">
-              <Tag className="size-3.5" />
-              <span className="text-xs">
-                Version {import.meta.env.APP_VERSION}
-              </span>
+            <div className="mt-8 border-t border-(--app-border)/40 pt-6 flex flex-col items-start text-left gap-3">
+              {/* Logo & Name */}
+              <div className="flex items-center gap-2">
+                <img src="/logo.png" alt="Quran0 Logo" className="size-8" />
+                <span className="text-base font-bold text-(--app-text-primary) tracking-tight">
+                  Quran0
+                </span>
+              </div>
+
+              {/* Short About */}
+              <p className="text-[13px] text-(--app-text-secondary) leading-relaxed max-w-61.25">
+                A mobile-first Quran reading application featuring offline
+                access and Bengali translations.
+              </p>
+
+              {/* Developer Attribute & Version */}
+              <div className="flex flex-col gap-1.5 mt-1 text-[13px] text-(--app-text-secondary) font-medium">
+                <div>
+                  Created by{' '}
+                  <a
+                    href="https://www.facebook.com/Shantodotdev/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-(--app-accent) font-semibold hover:underline transition-colors"
+                  >
+                    KR Shanto
+                  </a>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Tag className="size-3.5 text-(--app-text-muted)" />
+                  <span>Version {import.meta.env.APP_VERSION}</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
