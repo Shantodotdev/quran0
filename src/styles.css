@@ -5,6 +5,9 @@
   --animate-dropdown-out: dropdown-out 0.15s ease-in forwards;
   --animate-dropdown-up-in: dropdown-up-in 0.15s ease-out;
   --animate-dropdown-up-out: dropdown-up-out 0.15s ease-in forwards;
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-slide-up-from-bottom: slide-up-from-bottom 0.3s
+    cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root,
@@ -269,6 +272,26 @@ body {
 
 .animate-fade-in-up {
   animation: fade-in-up 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up-from-bottom {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 100%, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 /* Custom styles for range slider / seeker */

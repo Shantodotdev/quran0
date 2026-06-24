@@ -45,15 +45,19 @@ export function AudioPlayer() {
 
   const surah = currentSurahId ? getSurahById(currentSurahId) : null
 
-  // Route auto-switching: if user is on a surah page and the surah changes, switch view to it
+  // Route auto-switching: if user is on a surah page and the surah changes, switch view to it.
+  // Avoid re-navigating to the same surah — that would trigger a page transition scroll to top.
   useEffect(() => {
     if (currentSurahId && currentSurahId !== lastSurahIdRef.current) {
       lastSurahIdRef.current = currentSurahId
       if (pathname.startsWith('/surah/')) {
-        navigate({
-          to: '/surah/$surahId',
-          params: { surahId: String(currentSurahId) },
-        }).catch(console.warn)
+        const currentParam = pathname.split('/surah/')[1]
+        if (currentParam !== String(currentSurahId)) {
+          navigate({
+            to: '/surah/$surahId',
+            params: { surahId: String(currentSurahId) },
+          }).catch(console.warn)
+        }
       }
     }
   }, [currentSurahId, pathname, navigate])

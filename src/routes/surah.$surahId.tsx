@@ -408,6 +408,7 @@ function SurahPage() {
               {(verses) => (
                 <VerseList
                   verses={verses}
+                  surahId={surah.id}
                   highlightVerse={verse}
                   activePlayingVerse={activePlayingVerse}
                 />

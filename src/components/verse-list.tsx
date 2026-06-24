@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import type { QuranVerse } from '#/data/quran/types'
 import { useAudioStore } from '#/stores/audio'
+import { AyahActionModal } from '#/components/ayah-action-modal'
 
 // Module-level flag to track initial load
 let isInitialLoad = true
@@ -26,10 +27,12 @@ export function VerseList({
   verses,
   highlightVerse,
   activePlayingVerse,
+  surahId,
 }: {
   verses: QuranVerse[]
   highlightVerse?: number
   activePlayingVerse?: string | null
+  surahId: number
 }) {
   const activePlayingVerseNum = activePlayingVerse
     ? Number(activePlayingVerse.split(':')[1])
@@ -85,6 +88,7 @@ export function VerseList({
           <VerseCard
             key={verse.verseKey}
             verse={verse}
+            surahId={surahId}
             isHighlighted={isHighlighted}
             isPlayingHighlighted={isPlayingHighlighted}
           />
@@ -107,16 +111,45 @@ export function VerseList({
  */
 function VerseCard({
   verse,
+  surahId,
   isHighlighted,
   isPlayingHighlighted,
 }: {
   verse: QuranVerse
+  surahId: number
   isHighlighted?: boolean
   isPlayingHighlighted?: boolean
 }) {
   const isPlaying = useAudioStore((s) => s.isPlaying)
   const seekToVerse = useAudioStore((s) => s.seekToVerse)
   const cardRef = useRef<HTMLDivElement>(null)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  )
+  const [showModal, setShowModal] = useState(false)
+
+  const handlePlayFromAyah = useCallback(async () => {
+    const store = useAudioStore.getState()
+    if (store.currentSurahId !== surahId) {
+      await store.playSurah(surahId)
+    } else if (!store.isPlaying) {
+      store.togglePlay()
+    }
+    store.seekToVerse(verse.verseKey)
+  }, [surahId, verse.verseKey])
+
+  const startLongPress = useCallback(() => {
+    longPressTimer.current = setTimeout(() => {
+      setShowModal(true)
+    }, 500)
+  }, [])
+
+  const cancelLongPress = useCallback(() => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current)
+      longPressTimer.current = undefined
+    }
+  }, [])
 
   // Scroll handler for search highlight (run on mount/trigger)
   useEffect(() => {
@@ -154,59 +187,73 @@ function VerseCard({
   }, [isPlayingHighlighted])
 
   return (
-    <article
-      ref={cardRef}
-      onClick={() => {
-        if (isPlaying) {
-          seekToVerse(verse.verseKey)
-        }
-      }}
-      className={`p-3 rounded-lg transition-all duration-300 border-l-4 ${
-        isPlaying ? 'cursor-pointer hover:bg-(--app-hover-bg)/30' : ''
-      } ${
-        isHighlighted
-          ? 'animate-highlight bg-(--app-accent-soft)/40 border-transparent'
-          : isPlayingHighlighted
-            ? 'bg-(--app-accent-soft)/15 border-(--app-accent) shadow-sm'
-            : 'border-transparent'
-      }`}
-    >
-      {/* Verse key badge (surah:ayah) */}
-      <div className="flex items-start justify-between gap-3">
-        <span className="rounded-md bg-(--app-surface-raised) px-2 py-1 text-sm font-semibold text-(--app-text-secondary)">
-          {verse.verseKey}
-        </span>
-      </div>
-      {/* Arabic — font size from CSS var (set by settings), fallback 26px */}
-      <p
-        className="quran-arabic mt-5 text-right leading-relaxed text-(--app-text-primary)"
-        style={{ fontSize: 'var(--arabic-fs, 26px)' }}
-        dir="rtl"
-        lang="ar"
-      >
-        {verse.arabicIndopak}
-      </p>
-      {/* English transliteration — hidden via CSS var when toggled off */}
-      <p
-        className="mt-4 leading-7 text-(--app-text-secondary)"
-        style={{
-          fontSize: 'var(--english-fs, 16px)',
-          display: 'var(--show-en, block)',
+    <>
+      <article
+        ref={cardRef}
+        onClick={() => {
+          if (isPlaying) {
+            seekToVerse(verse.verseKey)
+          }
         }}
+        onMouseDown={startLongPress}
+        onMouseUp={cancelLongPress}
+        onMouseLeave={cancelLongPress}
+        onTouchStart={startLongPress}
+        onTouchEnd={cancelLongPress}
+        onTouchMove={cancelLongPress}
+        className={`p-3 rounded-lg transition-all duration-300 border-l-4 select-none ${
+          isPlaying ? 'cursor-pointer hover:bg-(--app-hover-bg)/30' : ''
+        } ${
+          isHighlighted
+            ? 'animate-highlight bg-(--app-accent-soft)/40 border-transparent'
+            : isPlayingHighlighted
+              ? 'bg-(--app-accent-soft)/15 border-(--app-accent) shadow-sm'
+              : 'border-transparent'
+        }`}
       >
-        {verse.transliterationEn}
-      </p>
-      {/* Bengali meaning — hidden via CSS var when toggled off */}
-      <p
-        className="mt-3 leading-7 text-(--app-text-muted)"
-        style={{
-          fontSize: 'var(--bengali-fs, 16px)',
-          display: 'var(--show-bn, block)',
-        }}
-        lang="bn"
-      >
-        {verse.translationBnTaisirul}
-      </p>
-    </article>
+        {/* Verse key badge (surah:ayah) */}
+        <div className="flex items-start justify-between gap-3">
+          <span className="rounded-md bg-(--app-surface-raised) px-2 py-1 text-sm font-semibold text-(--app-text-secondary)">
+            {verse.verseKey}
+          </span>
+        </div>
+        {/* Arabic — font size from CSS var (set by settings), fallback 26px */}
+        <p
+          className="quran-arabic mt-5 text-right leading-relaxed text-(--app-text-primary)"
+          style={{ fontSize: 'var(--arabic-fs, 26px)' }}
+          dir="rtl"
+          lang="ar"
+        >
+          {verse.arabicIndopak}
+        </p>
+        {/* English transliteration — hidden via CSS var when toggled off */}
+        <p
+          className="mt-4 leading-7 text-(--app-text-secondary)"
+          style={{
+            fontSize: 'var(--english-fs, 16px)',
+            display: 'var(--show-en, block)',
+          }}
+        >
+          {verse.transliterationEn}
+        </p>
+        {/* Bengali meaning — hidden via CSS var when toggled off */}
+        <p
+          className="mt-3 leading-7 text-(--app-text-muted)"
+          style={{
+            fontSize: 'var(--bengali-fs, 16px)',
+            display: 'var(--show-bn, block)',
+          }}
+          lang="bn"
+        >
+          {verse.translationBnTaisirul}
+        </p>
+      </article>
+      <AyahActionModal
+        verseKey={verse.verseKey}
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onPlayFromAyah={handlePlayFromAyah}
+      />
+    </>
   )
 }
