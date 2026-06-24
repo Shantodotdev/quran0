@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { CheckCircle2, Download, Minus, Plus, RotateCcw, Share, X } from 'lucide-react'
+import { CheckCircle2, Download, Minus, Plus, RotateCcw, Share, Tag, X } from 'lucide-react'
 import { useSettingsStore } from '#/stores/settings'
 import { usePwaStore } from '#/stores/pwa'
 import { ThemeSelector } from './theme-selector'
@@ -375,6 +375,13 @@ export function SettingsSidebar({ open, onClose }: SettingsSidebarProps) {
               <RotateCcw className="size-4" />
               Reset to Default
             </button>
+
+            <div className="mt-6 flex items-center justify-center gap-1.5 text-(--app-text-tertiary)">
+              <Tag className="size-3.5" />
+              <span className="text-xs">
+                Version {import.meta.env.APP_VERSION}
+              </span>
+            </div>
           </div>
         </div>
       </div>
