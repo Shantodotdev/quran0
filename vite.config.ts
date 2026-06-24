@@ -20,6 +20,9 @@ const prerenderPages = [
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
+  define: {
+    'import.meta.env.APP_VERSION': JSON.stringify(process.env.npm_package_version || '0.1.0'),
+  },
   plugins: [
     devtools(),
     tailwindcss(),
