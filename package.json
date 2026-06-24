@@ -1,5 +1,6 @@
 {
   "name": "quran0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "imports": {
