@@ -26,8 +26,18 @@ export interface ProgressState {
 
   // Selectors/Helpers
   getCurrentStreak: () => number
-  getStatsForDate: (dateStr: string) => { mins: number; verses: number; visits: number }
-  getWeeklyData: () => { day: string; dateStr: string; mins: number; verses: number; visits: number }[]
+  getStatsForDate: (dateStr: string) => {
+    mins: number
+    verses: number
+    visits: number
+  }
+  getWeeklyData: () => {
+    day: string
+    dateStr: string
+    mins: number
+    verses: number
+    visits: number
+  }[]
 }
 
 // Helper to get local YYYY-MM-DD date string
@@ -58,7 +68,11 @@ function calculateStreak(visitedDates: string[]): number {
   }
 
   let currentStreak = 0
-  const checkDate = new Date(hasToday ? todayStr : yesterdayStr)
+  // Construct from the current local date instead of parsing a YYYY-MM-DD
+  // string, which JavaScript interprets as UTC and can shift the date back
+  // in time zones west of UTC.
+  const checkDate = new Date()
+  if (!hasToday) checkDate.setDate(checkDate.getDate() - 1)
   let checkStr = getLocalDateString(checkDate)
 
   while (sortedDates.includes(checkStr)) {
@@ -159,7 +173,7 @@ export const useProgressStore = create<ProgressState>()(
         }
 
         // Update details if they reach 90%+ completion
-        if (newProgress >= 0.90 && alreadyLoggedReadToday) {
+        if (newProgress >= 0.9 && alreadyLoggedReadToday) {
           newActivities = state.activities.map((act) => {
             if (
               act.type === 'read' &&
