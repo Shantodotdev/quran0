@@ -10,14 +10,24 @@ import type { ManifestTransform } from 'workbox-build'
  * an offline navigation to `/surah/1` get the real page instead of the home
  * page fallback. Vercel serves the same HTML at both URLs.
  */
-const precacheCleanPageUrls: ManifestTransform = (entries) => ({
-  manifest: entries.map((entry) =>
+const precacheCleanPageUrls: ManifestTransform = (entries) => {
+  const manifest = entries.map((entry) =>
     entry.url !== 'index.html' && entry.url.endsWith('/index.html')
       ? { ...entry, url: entry.url.slice(0, -'/index.html'.length) }
       : entry,
-  ),
-  warnings: [],
-})
+  )
+
+  // Fail the build rather than deploy a worker that cannot start offline.
+  // generateSW does not return its entries, so this check lives here.
+  const urls = new Set(manifest.map((entry) => entry.url))
+  if (!urls.has('index.html') || !urls.has('surah/1')) {
+    throw new Error(
+      '[pwa] Prerendered pages are missing from the precache; sw.js would not work offline.',
+    )
+  }
+
+  return { manifest, warnings: [] }
+}
 
 /**
  * Generates the service worker into the deployed static directory.
@@ -27,7 +37,7 @@ const precacheCleanPageUrls: ManifestTransform = (entries) => ({
  */
 export async function generatePwa(publicDirectory: string) {
   const serviceWorkerPath = path.join(publicDirectory, 'sw.js')
-  const { count, size, warnings, manifestEntries } = await generateSW({
+  const { count, size, warnings } = await generateSW({
     globDirectory: publicDirectory,
     globPatterns: [
       '**/*.{css,html,ico,js,json,otf,png,svg,ttf,webmanifest,woff,woff2}',
@@ -44,14 +54,6 @@ export async function generatePwa(publicDirectory: string) {
 
   for (const warning of warnings) {
     console.warn(`[workbox] ${warning}`)
-  }
-
-  // Fail the build rather than deploy a worker that cannot start offline.
-  const precachedUrls = new Set(manifestEntries?.map((entry) => entry.url))
-  if (!precachedUrls.has('index.html') || !precachedUrls.has('surah/1')) {
-    throw new Error(
-      `[pwa] Prerendered pages are missing from ${publicDirectory}; sw.js would not work offline.`,
-    )
   }
 
   console.log(
