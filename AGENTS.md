@@ -34,7 +34,7 @@ Current product direction:
 | `src/styles.css`                        | Global Tailwind import and base styles                    |
 | `public`                                | Static images, icons, manifest, and robots metadata       |
 | `public/manifest.webmanifest`           | Quran0 install metadata and PWA icons                     |
-| `scripts/generate-pwa.ts`               | Generates Workbox output during Nitro's build lifecycle   |
+| `scripts/generate-pwa.ts`               | Generates Workbox output after prerendering               |
 | `src/components/pwa-install-prompt.tsx` | Install UI and service-worker registration                |
 | `vite.config.ts`                        | Vite, TanStack Start, React, Tailwind, and devtools setup |
 | `tsr.config.json`                       | TanStack Router CLI config                                |
@@ -106,10 +106,15 @@ Path aliases are configured in `package.json` and `tsconfig.json`:
 
 - TanStack Start prerenders `/`, `/progress`, and `/surah/1` through
   `/surah/114` into Nitro's public production output.
-- `vite.config.ts` registers a Nitro `compiled` hook. The hook calls
-  `scripts/generate-pwa.ts` with `nitro.options.output.publicDir`, ensuring
-  Workbox generates `sw.js` after Nitro finishes constructing the provider's
-  deployment output but before the host uploads it.
+- `vite.config.ts` has a `pwaServiceWorker` Vite plugin with a `post`
+  `buildApp` hook, listed after `tanstackStart()`. It calls
+  `scripts/generate-pwa.ts` on the client output directory (on Vercel,
+  `.vercel/output/static`) after TanStack Start prerenders the HTML. Do not
+  move it to Nitro's `compiled` hook: that fires before prerendering, so the
+  worker would precache no pages and the installed app would not open offline.
+- Prerendered pages are precached under their clean URLs (`/surah/1`, not
+  `/surah/1/index.html`), and the build fails if `index.html` or `surah/1` is
+  missing from the precache.
 - The generated Workbox service worker precaches all public production files,
   including every prerendered page and lazy Quran data chunk.
 - Do not add or edit a source `public/sw.js`. Workbox generates the production
